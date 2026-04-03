@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+body {
+  margin: 0;
+  font-family:
+    "Satoshi",
+    "Avenir Next",
+    "Segoe UI",
+    sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(47, 143, 112, 0.08), transparent 26%),
+    radial-gradient(circle at 82% 8%, rgba(232, 168, 117, 0.1), transparent 24%),
+    linear-gradient(180deg, #fbfcfb 0%, #f4f7f5 46%, #f7f1e6 100%);
+  color: #12263a;
+  transition:
+    background 220ms ease,
+    color 220ms ease;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #12263a;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 18px rgba(18, 38, 58, 0.18);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #12263a;
+  border: 3px solid #ffffff;
+  box-shadow: 0 6px 18px rgba(18, 38, 58, 0.18);
+}
+
+@layer components {
+  .card {
+    @apply rounded-[28px] border border-slate-200/80 bg-white/90 p-6 shadow-card backdrop-blur;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(251, 248, 242, 0.92) 100%);
+  }
+
+  .surface-soft {
+    @apply rounded-[24px] border border-stone-200;
+    background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 244, 237, 0.94) 100%);
+  }
+
+  .surface-mint {
+    @apply rounded-[24px] border border-emerald-100;
+    background-image: linear-gradient(180deg, rgba(252, 255, 253, 0.98) 0%, rgba(239, 249, 243, 0.96) 100%);
+  }
+
+  .surface-shell {
+    @apply rounded-[30px] border border-stone-200/70 p-1;
+    background-image: linear-gradient(180deg, rgba(247, 249, 246, 0.88) 0%, rgba(248, 242, 234, 0.82) 100%);
+  }
+
+  .chip {
+    @apply rounded-full border border-stone-200 bg-white/90 px-3 py-1 text-sm text-slate-700 shadow-sm;
+  }
+
+  .eyebrow {
+    @apply text-xs font-semibold uppercase tracking-[0.24em] text-accent;
+  }
+}
