@@ -12,7 +12,7 @@ export default function HomePage() {
         <div className="absolute inset-0 glass-grain" />
       </div>
 
-      <section className="relative border-b border-stone-200/80">
+      <section className="relative border-b border-white/50 backdrop-blur-xl">
         <div className="relative mx-auto grid max-w-7xl gap-5 px-6 py-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,360px)] lg:px-8 lg:py-6">
           <div className="max-w-3xl">
             <p className="eyebrow">UAB Student Wellness Concept</p>

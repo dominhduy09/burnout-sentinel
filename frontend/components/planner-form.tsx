@@ -172,10 +172,10 @@ function MetricControl({
 
   return (
     <div
-      className={`rounded-[24px] border p-4 ${
+      className={`relative overflow-hidden rounded-[24px] border p-4 backdrop-blur-xl ${
         isRecovery
-          ? "border-emerald-100 bg-[linear-gradient(180deg,_#fbfffd_0%,_#f1f9f4_100%)]"
-          : "border-stone-200 bg-[linear-gradient(180deg,_#fffefd_0%,_#f9f5ee_100%)]"
+          ? "border-emerald-100/60 bg-[linear-gradient(135deg,_rgba(242,253,248,0.58)_0%,_rgba(224,250,238,0.18)_100%)]"
+          : "border-white/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.62)_0%,_rgba(255,245,234,0.16)_100%)]"
       }`}
     >
       <div className="flex items-start justify-between gap-3">
@@ -184,9 +184,7 @@ function MetricControl({
           <p className="mt-1 text-xs leading-5 text-slate-600">{field.helper}</p>
         </div>
         <div
-          className={`shrink-0 rounded-2xl px-3 py-2 text-sm font-semibold ${
-            isRecovery ? "bg-emerald-100 text-emerald-800" : "bg-orange-50 text-stone-700"
-          }`}
+          className={`shrink-0 glass-pill ${isRecovery ? "glass-pill-mint" : "glass-pill-amber"}`}
         >
           {formatValue(value, field.step)} {field.suffix}
         </div>
@@ -206,9 +204,7 @@ function MetricControl({
             });
           }}
           style={{ accentColor: isRecovery ? "#1d8f6e" : "#c26b4a" }}
-          className={`slider h-2 w-full cursor-pointer appearance-none rounded-full ${
-            isRecovery ? "bg-emerald-100" : "bg-orange-100"
-          }`}
+          className="slider h-2 w-full cursor-pointer appearance-none rounded-full bg-white/30 shadow-inner"
         />
         <input
           type="number"
@@ -216,7 +212,7 @@ function MetricControl({
           max={field.max}
           step={field.step}
           {...form.register(field.name, { valueAsNumber: true })}
-          className="h-11 w-20 rounded-2xl border border-stone-200 bg-white px-3 text-sm text-ink outline-none transition focus:border-accent focus:ring-4 focus:ring-emerald-100"
+          className="glass-input h-11 w-20 px-3"
         />
       </div>
 
@@ -338,8 +334,9 @@ export function PlannerForm() {
     <div className="grid gap-6 xl:grid-cols-[minmax(360px,460px)_minmax(0,1fr)] xl:items-start">
       <div className="xl:sticky xl:top-6">
         <div className="card max-h-[calc(100vh-8.5rem)] overflow-hidden p-0 xl:flex xl:flex-col">
-          <div className="border-b border-stone-200 bg-[linear-gradient(135deg,_rgba(255,255,255,0.96)_0%,_rgba(244,249,247,0.98)_42%,_rgba(248,242,233,0.98)_100%)] px-5 py-4 text-ink">
-            <div className="flex items-start justify-between gap-4">
+          <div className="relative border-b border-white/50 bg-[linear-gradient(135deg,_rgba(255,255,255,0.65)_0%,_rgba(240,252,246,0.24)_48%,_rgba(255,242,230,0.2)_100%)] px-5 py-4 text-ink">
+            <div className="absolute inset-0 glass-grain" />
+            <div className="relative flex items-start justify-between gap-4">
               <div>
                 <p className="eyebrow">Planner Input</p>
                 <h2 className="mt-2 text-xl font-semibold">Shape one week</h2>
@@ -385,7 +382,7 @@ export function PlannerForm() {
                   <input
                     type="text"
                     {...form.register("week_name")}
-                    className="mt-2 h-11 w-full rounded-2xl border border-stone-200 bg-white px-4 text-sm text-ink outline-none transition focus:border-accent focus:bg-white focus:ring-4 focus:ring-emerald-100"
+                    className="glass-input mt-2 h-11 w-full"
                   />
                   {form.formState.errors.week_name ? (
                     <p className="mt-2 text-xs text-rose-600">
@@ -506,7 +503,7 @@ export function PlannerForm() {
             </div>
 
             {error ? (
-              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <div className="rounded-2xl border border-amber-200/60 bg-amber-50/40 px-4 py-3 text-sm text-amber-900 backdrop-blur-xl">
                 {error}
               </div>
             ) : null}

@@ -43,30 +43,33 @@ export default function ResearchRotator() {
   const slide = SLIDES[index];
 
   return (
-    <div className="surface-mint flex min-h-[190px] flex-col justify-between p-5 text-slate-900 shadow-card">
-      <div>
-        <div className="flex items-center justify-between gap-3">
+    <div className="card flex min-h-[190px] flex-col justify-between p-0 shadow-card">
+      <div className="relative border-b border-white/50 px-5 py-4">
+        <div className="absolute inset-0 glass-grain" />
+        <div className="relative flex items-center justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Research Signal</p>
           <div className="flex gap-1.5">
             {SLIDES.map((item, itemIndex) => (
               <span
                 key={item.title}
-                className={`h-1.5 w-6 rounded-full ${itemIndex === index ? "bg-coral" : "bg-slate-200"}`}
+                className={`h-1.5 w-6 rounded-full ${itemIndex === index ? "bg-coral" : "bg-white/40"}`}
               />
             ))}
           </div>
         </div>
+      </div>
 
-        <div className="mt-3 space-y-2">
-          <span className="inline-flex rounded-full border border-emerald-100 bg-white/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-700">
+      <div className="px-5 py-4">
+        <div className="space-y-2">
+          <span className="glass-pill glass-pill-mint px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
             {slide.tag}
           </span>
-          <h2 className="text-lg font-semibold leading-7">{slide.title}</h2>
+          <h2 className="text-lg font-semibold leading-7 text-ink">{slide.title}</h2>
           <p className="text-sm leading-6 text-slate-700">{slide.body}</p>
         </div>
       </div>
 
-      <div className="mt-4 border-t border-emerald-100/80 pt-3 text-[11px] uppercase tracking-[0.18em] text-slate-500">
+      <div className="border-t border-white/50 px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-slate-600">
         Source: {slide.source}
       </div>
     </div>
