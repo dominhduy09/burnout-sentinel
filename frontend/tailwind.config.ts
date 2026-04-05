@@ -14,7 +14,7 @@ const config: Config = {
         coral: "#f07d62"
       },
       boxShadow: {
-        card: "0 20px 45px rgba(18, 38, 58, 0.12)"
+        card: "0 22px 70px rgba(18, 38, 58, 0.06), 0 8px 22px rgba(18, 38, 58, 0.03)"
       }
     }
   },

@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { type FieldPath, type UseFormReturn, useForm } from "react-hook-form";
 
 import { MetricChart } from "@/components/metric-chart";
@@ -229,6 +229,12 @@ function MetricControl({
 export function PlannerForm() {
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [analysisToken, setAnalysisToken] = useState(0);
+  const [celebrateToken, setCelebrateToken] = useState(0);
+  const [moderateToken, setModerateToken] = useState(0);
+  const [highToken, setHighToken] = useState(0);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const audioPrimedRef = useRef(false);
 
   const form = useForm<PlannerFormValues>({
     resolver: zodResolver(plannerSchema),
@@ -297,6 +303,7 @@ export function PlannerForm() {
 
       const payload: AnalysisResponse = await response.json();
       setResult(payload);
+      setAnalysisToken((value) => value + 1);
     } catch (submitError) {
       const message =
         submitError instanceof Error
@@ -305,6 +312,143 @@ export function PlannerForm() {
       setError(message);
     }
   }
+
+  function primeCelebrationSound() {
+    audioPrimedRef.current = true;
+
+    if (audioContextRef.current) {
+      void audioContextRef.current.resume().catch(() => {});
+      return;
+    }
+
+    try {
+      const context = new AudioContext();
+      audioContextRef.current = context;
+      void context.resume().catch(() => {});
+    } catch {
+      // ignore: sound is optional
+    }
+  }
+
+  function playLowSound() {
+    if (!audioPrimedRef.current) return;
+    const context = audioContextRef.current;
+    if (!context) return;
+
+    try {
+      const now = context.currentTime;
+      const master = context.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.18, now + 0.02);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.45);
+      master.connect(context.destination);
+
+      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+      notes.forEach((frequency, index) => {
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(frequency, now + index * 0.07);
+        gain.gain.setValueAtTime(0.0001, now + index * 0.07);
+        gain.gain.exponentialRampToValueAtTime(0.12, now + index * 0.07 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.07 + 0.48);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now + index * 0.07);
+        osc.stop(now + index * 0.07 + 0.5);
+      });
+    } catch {
+      // ignore: sound is optional
+    }
+  }
+
+  function playModerateSound() {
+    if (!audioPrimedRef.current) return;
+    const context = audioContextRef.current;
+    if (!context) return;
+
+    try {
+      const now = context.currentTime;
+      const master = context.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.14, now + 0.02);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
+      master.connect(context.destination);
+
+      const notes = [659.25, 587.33, 523.25]; // E5 D5 C5
+      notes.forEach((frequency, index) => {
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(frequency, now + index * 0.09);
+        gain.gain.setValueAtTime(0.0001, now + index * 0.09);
+        gain.gain.exponentialRampToValueAtTime(0.09, now + index * 0.09 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.09 + 0.28);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now + index * 0.09);
+        osc.stop(now + index * 0.09 + 0.3);
+      });
+    } catch {
+      // ignore: sound is optional
+    }
+  }
+
+  function playHighSound() {
+    if (!audioPrimedRef.current) return;
+    const context = audioContextRef.current;
+    if (!context) return;
+
+    try {
+      const now = context.currentTime;
+      const master = context.createGain();
+      master.gain.setValueAtTime(0.0001, now);
+      master.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
+      master.connect(context.destination);
+
+      const pattern = [
+        { frequency: 392.0, start: 0.0, duration: 0.16 },
+        { frequency: 392.0, start: 0.23, duration: 0.16 },
+        { frequency: 311.13, start: 0.46, duration: 0.22 } // Eb4
+      ];
+
+      pattern.forEach((tone) => {
+        const osc = context.createOscillator();
+        const gain = context.createGain();
+        osc.type = "square";
+        osc.frequency.setValueAtTime(tone.frequency, now + tone.start);
+        gain.gain.setValueAtTime(0.0001, now + tone.start);
+        gain.gain.exponentialRampToValueAtTime(0.1, now + tone.start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + tone.start + tone.duration);
+        osc.connect(gain);
+        gain.connect(master);
+        osc.start(now + tone.start);
+        osc.stop(now + tone.start + tone.duration + 0.02);
+      });
+    } catch {
+      // ignore: sound is optional
+    }
+  }
+
+  useEffect(() => {
+    if (!result || analysisToken === 0) return;
+
+    if (result.risk_label === "Low") {
+      setCelebrateToken((value) => value + 1);
+      playLowSound();
+      return;
+    }
+
+    if (result.risk_label === "Moderate") {
+      setModerateToken((value) => value + 1);
+      playModerateSound();
+      return;
+    }
+
+    setHighToken((value) => value + 1);
+    playHighSound();
+  }, [analysisToken]);
 
   const totalLoad = Number(values.estimated_task_hours) + Number(values.clinical_hours);
   const totalLoadStatus = totalLoad > 40 ? "risk" : totalLoad > 28 ? "watch" : "healthy";
@@ -451,7 +595,7 @@ export function PlannerForm() {
                   </p>
                   <div className="mt-3 h-2 rounded-full bg-white/30">
                     <div
-                      className={`h-2 rounded-full bg-gradient-to-r ${statStyleByStatus[totalLoadStatus].bar}`}
+                      className={`h-2 rounded-full bg-gradient-to-r transition-[width] duration-500 ease-out motion-reduce:transition-none ${statStyleByStatus[totalLoadStatus].bar}`}
                       style={{ width: `${clampPercent(totalLoad, 60)}%` }}
                     />
                   </div>
@@ -472,7 +616,7 @@ export function PlannerForm() {
                   </p>
                   <div className="mt-3 h-2 rounded-full bg-white/30">
                     <div
-                      className={`h-2 rounded-full bg-gradient-to-r ${statStyleByStatus[pressureStatus].bar}`}
+                      className={`h-2 rounded-full bg-gradient-to-r transition-[width] duration-500 ease-out motion-reduce:transition-none ${statStyleByStatus[pressureStatus].bar}`}
                       style={{ width: `${clampPercent(values.high_priority_task_count, 12)}%` }}
                     />
                   </div>
@@ -494,7 +638,7 @@ export function PlannerForm() {
                   </p>
                   <div className="mt-3 h-2 rounded-full bg-white/30">
                     <div
-                      className={`h-2 rounded-full bg-gradient-to-r ${statStyleByStatus[bufferStatus].bar}`}
+                      className={`h-2 rounded-full bg-gradient-to-r transition-[width] duration-500 ease-out motion-reduce:transition-none ${statStyleByStatus[bufferStatus].bar}`}
                       style={{ width: `${clampPercent(values.free_hours, 30)}%` }}
                     />
                   </div>
@@ -511,6 +655,7 @@ export function PlannerForm() {
             <button
               type="submit"
               disabled={isSubmitting}
+              onPointerDown={primeCelebrationSound}
               className="glass-button glass-button-ink inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-70 xl:sticky xl:bottom-0 active:translate-y-px"
             >
               {isSubmitting ? (
@@ -527,7 +672,12 @@ export function PlannerForm() {
       </div>
 
       <div className="space-y-6 xl:max-h-[calc(100vh-8.5rem)] xl:overflow-y-auto xl:pr-1">
-        <RiskPanel result={result} />
+        <RiskPanel
+          result={result}
+          celebrateToken={celebrateToken}
+          moderateToken={moderateToken}
+          highToken={highToken}
+        />
         <MetricChart insights={result?.insights ?? fallbackInsights} />
       </div>
     </div>

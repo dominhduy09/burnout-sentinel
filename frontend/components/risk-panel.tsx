@@ -2,6 +2,9 @@ import type { AnalysisResponse } from "@/lib/types";
 
 type Props = {
   result: AnalysisResponse | null;
+  celebrateToken?: number;
+  moderateToken?: number;
+  highToken?: number;
 };
 
 const riskStyles = {
@@ -10,13 +13,102 @@ const riskStyles = {
   High: "bg-rose-50/40 text-rose-900 ring-rose-200/60"
 } as const;
 
+const riskCopy = {
+  Low: {
+    headline: "Balanced week",
+    body: "Your workload and recovery look reasonably aligned. Protect sleep and buffer time as deadlines change."
+  },
+  Moderate: {
+    headline: "Starting to compress",
+    body: "This week is trending heavy. Small changes (reduce compression, protect sleep, add buffer time) can prevent a slide into overload."
+  },
+  High: {
+    headline: "Overload risk",
+    body: "This week is likely to feel crowded and reactive. The best first move is to reduce compression and add recovery time before performance suffers."
+  }
+} as const;
+
 const priorityStyles = {
   high: "border-rose-200/60 bg-rose-50/35 text-rose-900",
   medium: "border-amber-200/60 bg-amber-50/35 text-amber-900",
   low: "border-emerald-200/60 bg-emerald-50/35 text-emerald-900"
 } as const;
 
-export function RiskPanel({ result }: Props) {
+function ReactionBurst({ variant }: { variant: "low" | "moderate" | "high" }) {
+  const count = variant === "low" ? 18 : variant === "high" ? 16 : 14;
+
+  return (
+    <div aria-hidden className={`reaction-burst reaction-burst--${variant}`}>
+      {Array.from({ length: count }).map((_, index) => (
+        <span key={index} style={{ ["--i" as never]: index } as React.CSSProperties} />
+      ))}
+    </div>
+  );
+}
+
+function MethodDetails() {
+  return (
+    <details className="mt-5 rounded-2xl border border-white/55 bg-white/20 px-4 py-3 text-sm text-slate-700 backdrop-blur-xl">
+      <summary className="cursor-pointer select-none text-xs font-semibold uppercase tracking-[0.22em] text-stone-700">
+        How the risk level works
+      </summary>
+      <div className="mt-3 space-y-3 leading-6">
+        <p>
+          This is an explainable demo score (0–100) based on workload + recovery signals. It is not a medical
+          diagnosis.
+        </p>
+        <div className="surface-shell p-3">
+          <div className="grid gap-2 sm:grid-cols-3">
+            <div className="glass-stat">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">Low</p>
+              <p className="mt-1 text-sm font-semibold text-ink">0–39</p>
+            </div>
+            <div className="glass-stat">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">Moderate</p>
+              <p className="mt-1 text-sm font-semibold text-ink">40–69</p>
+            </div>
+            <div className="glass-stat">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">High</p>
+              <p className="mt-1 text-sm font-semibold text-ink">70–100</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.22em] text-stone-700">References</p>
+          <ul className="list-disc space-y-1 pl-5 text-[13px] text-slate-700">
+            <li>
+              WHO ICD-11: burn-out as an occupational phenomenon.{" "}
+              <a
+                className="underline decoration-emerald-300/70 underline-offset-2 hover:text-ink"
+                href="https://www.who.int/standards/classifications/frequently-asked-questions/burn-out-an-occupational-phenomenon"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Read
+              </a>
+              .
+            </li>
+            <li>
+              Kristensen et al. (2005): Copenhagen Burnout Inventory (CBI).{" "}
+              <a
+                className="underline decoration-emerald-300/70 underline-offset-2 hover:text-ink"
+                href="https://researchprofiles.ku.dk/en/publications/the-copenhagen-burnout-inventory-a-new-tool-for-the-assessment-of/"
+                target="_blank"
+                rel="noreferrer"
+              >
+                Abstract
+              </a>
+              .
+            </li>
+          </ul>
+        </div>
+      </div>
+    </details>
+  );
+}
+
+export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: Props) {
   if (!result) {
     return (
       <div className="card p-0 shadow-card">
@@ -49,6 +141,8 @@ export function RiskPanel({ result }: Props) {
               </div>
             </div>
           </div>
+
+          <MethodDetails />
         </div>
       </div>
     );
@@ -59,6 +153,15 @@ export function RiskPanel({ result }: Props) {
       <div className="card p-0">
         <div className="relative border-b border-white/50 bg-[linear-gradient(135deg,_rgba(255,255,255,0.64)_0%,_rgba(240,252,246,0.22)_48%,_rgba(255,242,230,0.18)_100%)] px-6 py-5">
           <div className="absolute inset-0 glass-grain" />
+          {result.risk_label === "Low" && celebrateToken ? (
+            <ReactionBurst key={`low-${celebrateToken}`} variant="low" />
+          ) : null}
+          {result.risk_label === "Moderate" && moderateToken ? (
+            <ReactionBurst key={`moderate-${moderateToken}`} variant="moderate" />
+          ) : null}
+          {result.risk_label === "High" && highToken ? (
+            <ReactionBurst key={`high-${highToken}`} variant="high" />
+          ) : null}
           <div className="relative flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-sm uppercase tracking-[0.24em] text-stone-600">Burnout Risk</p>
@@ -70,6 +173,8 @@ export function RiskPanel({ result }: Props) {
                   {result.risk_score}
                 </span>
               </div>
+              <p className="mt-3 text-sm font-semibold text-ink">{riskCopy[result.risk_label].headline}</p>
+              <p className="mt-1 max-w-xl text-sm leading-6 text-slate-700">{riskCopy[result.risk_label].body}</p>
             </div>
 
             <div className="glass-pill px-3 py-2 text-[11px] uppercase tracking-[0.18em] text-stone-700">
@@ -80,6 +185,7 @@ export function RiskPanel({ result }: Props) {
 
         <div className="px-6 py-5">
           <p className="text-sm leading-7 text-slate-700">{result.summary}</p>
+          <MethodDetails />
         </div>
       </div>
 
