@@ -153,6 +153,11 @@ function formatValue(value: number, step: number) {
   return step < 1 ? value.toFixed(1) : String(Math.round(value));
 }
 
+function clampPercent(value: number, max: number) {
+  if (!Number.isFinite(value) || !Number.isFinite(max) || max <= 0) return 0;
+  return Math.max(0, Math.min(100, (value / max) * 100));
+}
+
 function MetricControl({
   form,
   field
@@ -306,6 +311,28 @@ export function PlannerForm() {
   }
 
   const totalLoad = Number(values.estimated_task_hours) + Number(values.clinical_hours);
+  const totalLoadStatus = totalLoad > 40 ? "risk" : totalLoad > 28 ? "watch" : "healthy";
+  const pressureStatus =
+    values.high_priority_task_count > 5 ? "risk" : values.high_priority_task_count > 3 ? "watch" : "healthy";
+  const bufferStatus = values.free_hours < 10 ? "risk" : values.free_hours < 16 ? "watch" : "healthy";
+
+  const statStyleByStatus = {
+    healthy: {
+      dot: "bg-emerald-400",
+      label: "text-emerald-800",
+      bar: "from-emerald-500/80 to-emerald-300/30"
+    },
+    watch: {
+      dot: "bg-amber-400",
+      label: "text-amber-800",
+      bar: "from-amber-500/80 to-amber-300/30"
+    },
+    risk: {
+      dot: "bg-rose-400",
+      label: "text-rose-800",
+      bar: "from-rose-500/80 to-rose-300/30"
+    }
+  } as const;
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(360px,460px)_minmax(0,1fr)] xl:items-start">
@@ -320,9 +347,9 @@ export function PlannerForm() {
                   Adjust the schedule like a control panel, then see how the week changes.
                 </p>
               </div>
-              <div className="rounded-[22px] border border-emerald-100 bg-white/75 px-4 py-3 text-right shadow-sm">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-stone-500">Live Total</p>
-                <p className="mt-1 text-2xl font-semibold">{totalLoad}h</p>
+              <div className="glass-stat text-right">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">Live Total</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">{totalLoad}h</p>
               </div>
             </div>
           </div>
@@ -344,7 +371,7 @@ export function PlannerForm() {
                         setResult(null);
                         setError(null);
                       }}
-                      className="rounded-full border border-stone-200 bg-white px-3 py-2 text-sm font-semibold text-ink transition hover:border-accent hover:bg-emerald-50"
+                      className="glass-button rounded-full px-3 py-2 text-sm font-semibold text-ink hover:border-emerald-200/70"
                     >
                       {preset.label}
                     </button>
@@ -375,7 +402,7 @@ export function PlannerForm() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Workload</p>
                   <p className="mt-1 text-sm text-stone-600">Academic and task pressure across the week.</p>
                 </div>
-                <div className="rounded-2xl bg-orange-50 px-3 py-2 text-sm font-semibold text-stone-700">
+                <div className="glass-pill glass-pill-amber">
                   {values.task_count} tasks
                 </div>
               </div>
@@ -395,7 +422,7 @@ export function PlannerForm() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Recovery</p>
                   <p className="mt-1 text-sm text-stone-600">Sleep, stress, and the amount of room left to breathe.</p>
                 </div>
-                <div className="rounded-2xl bg-emerald-100 px-3 py-2 text-sm font-semibold text-emerald-800">
+                <div className="glass-pill glass-pill-mint">
                   {values.free_hours}h buffer
                 </div>
               </div>
@@ -409,18 +436,72 @@ export function PlannerForm() {
               </div>
             </div>
 
-            <div className="surface-shell grid gap-2 sm:grid-cols-3">
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-stone-500">Total Load</p>
-                <p className="mt-1 text-xl font-semibold text-ink">{totalLoad}h</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-stone-500">Priority Pressure</p>
-                <p className="mt-1 text-xl font-semibold text-ink">{values.high_priority_task_count}</p>
-              </div>
-              <div>
-                <p className="text-xs uppercase tracking-[0.18em] text-stone-500">Recovery Buffer</p>
-                <p className="mt-1 text-xl font-semibold text-ink">{values.free_hours}h</p>
+            <div className="surface-shell p-3">
+              <div className="grid gap-3 sm:grid-cols-3">
+                <div className="glass-stat">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2 w-2 rounded-full ${statStyleByStatus[totalLoadStatus].dot}`} />
+                      <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[totalLoadStatus].label}`}>
+                        Total Load
+                      </p>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-stone-600">hrs</span>
+                  </div>
+                  <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
+                    {totalLoad}
+                    <span className="ml-1 text-base font-semibold text-stone-600">h</span>
+                  </p>
+                  <div className="mt-3 h-2 rounded-full bg-white/30">
+                    <div
+                      className={`h-2 rounded-full bg-gradient-to-r ${statStyleByStatus[totalLoadStatus].bar}`}
+                      style={{ width: `${clampPercent(totalLoad, 60)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="glass-stat">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2 w-2 rounded-full ${statStyleByStatus[pressureStatus].dot}`} />
+                      <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[pressureStatus].label}`}>
+                        Priority Pressure
+                      </p>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-stone-600">tasks</span>
+                  </div>
+                  <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
+                    {values.high_priority_task_count}
+                  </p>
+                  <div className="mt-3 h-2 rounded-full bg-white/30">
+                    <div
+                      className={`h-2 rounded-full bg-gradient-to-r ${statStyleByStatus[pressureStatus].bar}`}
+                      style={{ width: `${clampPercent(values.high_priority_task_count, 12)}%` }}
+                    />
+                  </div>
+                </div>
+
+                <div className="glass-stat">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2 w-2 rounded-full ${statStyleByStatus[bufferStatus].dot}`} />
+                      <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[bufferStatus].label}`}>
+                        Recovery Buffer
+                      </p>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-stone-600">hrs</span>
+                  </div>
+                  <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
+                    {values.free_hours}
+                    <span className="ml-1 text-base font-semibold text-stone-600">h</span>
+                  </p>
+                  <div className="mt-3 h-2 rounded-full bg-white/30">
+                    <div
+                      className={`h-2 rounded-full bg-gradient-to-r ${statStyleByStatus[bufferStatus].bar}`}
+                      style={{ width: `${clampPercent(values.free_hours, 30)}%` }}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -433,9 +514,16 @@ export function PlannerForm() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="inline-flex w-full items-center justify-center rounded-2xl bg-ink px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-70 xl:sticky xl:bottom-0"
+              className="glass-button glass-button-ink inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-70 xl:sticky xl:bottom-0 active:translate-y-px"
             >
-              {isSubmitting ? "Analyzing..." : "Analyze Burnout Risk"}
+              {isSubmitting ? (
+                <>
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                  <span>Analyzing...</span>
+                </>
+              ) : (
+                "Analyze Burnout Risk"
+              )}
             </button>
           </form>
         </div>

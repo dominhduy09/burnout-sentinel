@@ -5,9 +5,11 @@ export default function HomePage() {
   return (
     <main className="relative min-h-screen overflow-hidden text-slate-900 transition-colors">
       <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-[-10rem] top-[-8rem] h-[22rem] w-[22rem] rounded-full bg-emerald-100/40 blur-3xl" />
-        <div className="absolute right-[-6rem] top-[4rem] h-[18rem] w-[18rem] rounded-full bg-amber-100/45 blur-3xl" />
-        <div className="absolute bottom-[-10rem] left-[30%] h-[24rem] w-[24rem] rounded-full bg-teal-50/30 blur-3xl" />
+        <div className="absolute left-[-12rem] top-[-10rem] h-[28rem] w-[28rem] rounded-full bg-emerald-200/40 blur-[110px] mix-blend-multiply" />
+        <div className="absolute right-[-8rem] top-[3rem] h-[22rem] w-[22rem] rounded-full bg-amber-200/45 blur-[95px] mix-blend-multiply" />
+        <div className="absolute bottom-[-12rem] left-[24%] h-[30rem] w-[30rem] rounded-full bg-teal-200/30 blur-[120px] mix-blend-multiply" />
+        <div className="absolute left-[52%] top-[-6rem] h-[18rem] w-[18rem] rounded-full bg-sky-200/25 blur-[95px] mix-blend-multiply" />
+        <div className="absolute inset-0 glass-grain" />
       </div>
 
       <section className="relative border-b border-stone-200/80">
