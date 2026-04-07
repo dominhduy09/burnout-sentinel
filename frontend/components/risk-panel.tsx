@@ -150,9 +150,8 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
 
   return (
     <div className="space-y-4">
-      <div className="card p-0">
-        <div className="relative border-b border-white/50 bg-[linear-gradient(135deg,_rgba(255,255,255,0.64)_0%,_rgba(240,252,246,0.22)_48%,_rgba(255,242,230,0.18)_100%)] px-6 py-5">
-          <div className="absolute inset-0 glass-grain" />
+      <div className="card-flat p-0">
+        <div className="relative border-b border-white/50 bg-white/25 px-5 py-4 text-ink">
           {result.risk_label === "Low" && celebrateToken ? (
             <ReactionBurst key={`low-${celebrateToken}`} variant="low" />
           ) : null}
@@ -183,7 +182,7 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
           </div>
         </div>
 
-        <div className="px-6 py-5">
+        <div className="px-5 py-5">
           <p className="text-sm leading-7 text-slate-700">{result.summary}</p>
           <MethodDetails />
         </div>
