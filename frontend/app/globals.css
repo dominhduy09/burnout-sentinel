@@ -84,6 +84,25 @@ input[type="number"] {
     box-shadow: none;
   }
 
+  .panel-header {
+    @apply relative border-b border-white/50 px-5 py-4 text-ink;
+    background-image: linear-gradient(
+      135deg,
+      rgba(255, 255, 255, 0.64) 0%,
+      rgba(240, 252, 246, 0.22) 48%,
+      rgba(255, 242, 230, 0.18) 100%
+    );
+  }
+
+  .panel-header-flat {
+    @apply relative border-b border-white/50 bg-white/25 px-5 py-4 text-ink;
+    background-image: none;
+  }
+
+  .panel-body {
+    @apply px-5 py-5;
+  }
+
   .card::after,
   .glass-stat::after {
     content: "";

@@ -40,6 +40,28 @@ export default function HomePage() {
       <section className="mx-auto max-w-7xl px-6 py-4 lg:px-8 lg:py-4">
         <PlannerForm />
       </section>
+
+      <footer className="relative mx-auto flex max-w-7xl flex-col gap-2 px-6 pb-10 pt-2 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-slate-600">Credits:</span>
+          <a
+            className="font-medium text-ink underline decoration-emerald-300/70 underline-offset-2 hover:decoration-emerald-400/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+            href="https://bio.link/dmduy"
+            target="_blank"
+            rel="noreferrer"
+          >
+            Minh Duy Do
+          </a>
+        </div>
+        <a
+          className="glass-pill w-fit text-ink transition hover:bg-white/65 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+          href="https://github.com/dominhduy09/burnout-sentinel"
+          target="_blank"
+          rel="noreferrer"
+        >
+          GitHub project
+        </a>
+      </footer>
     </main>
   );
 }

@@ -32,7 +32,7 @@ type Props = {
 export function MetricChart({ insights }: Props) {
   return (
     <div className="card overflow-hidden p-0 shadow-card">
-      <div className="relative border-b border-white/50 bg-[linear-gradient(135deg,_rgba(255,255,255,0.62)_0%,_rgba(236,252,247,0.22)_52%,_rgba(255,242,230,0.2)_100%)] px-6 py-5">
+      <div className="panel-header">
         <div className="absolute inset-0 glass-grain" />
         <div className="relative">
           <h3 className="text-lg font-semibold text-ink">Workload Snapshot</h3>

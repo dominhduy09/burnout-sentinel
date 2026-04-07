@@ -44,7 +44,7 @@ export default function ResearchRotator() {
 
   return (
     <div className="card flex min-h-[190px] flex-col justify-between p-0 shadow-card">
-      <div className="relative border-b border-white/50 px-5 py-4">
+      <div className="panel-header">
         <div className="absolute inset-0 glass-grain" />
         <div className="relative flex items-center justify-between gap-3">
           <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Research Signal</p>

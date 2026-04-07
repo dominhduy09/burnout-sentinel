@@ -478,7 +478,7 @@ export function PlannerForm() {
     <div className="grid gap-6 xl:grid-cols-[minmax(360px,460px)_minmax(0,1fr)] xl:items-start">
       <div className="xl:sticky xl:top-6">
         <div className="card max-h-[calc(100vh-8.5rem)] overflow-hidden p-0 xl:flex xl:flex-col">
-          <div className="relative border-b border-white/50 bg-[linear-gradient(135deg,_rgba(255,255,255,0.65)_0%,_rgba(240,252,246,0.24)_48%,_rgba(255,242,230,0.2)_100%)] px-5 py-4 text-ink">
+          <div className="panel-header">
             <div className="absolute inset-0 glass-grain" />
             <div className="relative flex items-start justify-between gap-4">
               <div>

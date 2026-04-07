@@ -151,7 +151,7 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
   return (
     <div className="space-y-4">
       <div className="card-flat p-0">
-        <div className="relative border-b border-white/50 bg-white/25 px-5 py-4 text-ink">
+        <div className="panel-header-flat">
           {result.risk_label === "Low" && celebrateToken ? (
             <ReactionBurst key={`low-${celebrateToken}`} variant="low" />
           ) : null}
@@ -182,7 +182,7 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
           </div>
         </div>
 
-        <div className="px-5 py-5">
+        <div className="panel-body">
           <p className="text-sm leading-7 text-slate-700">{result.summary}</p>
           <MethodDetails />
         </div>
