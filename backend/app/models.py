@@ -7,6 +7,7 @@ from pydantic import BaseModel, Field, computed_field
 
 RiskLabel = Literal["Low", "Moderate", "High"]
 Priority = Literal["high", "medium", "low"]
+BreakdownDirection = Literal["risk", "protective", "multiplier"]
 
 
 class PlannerInput(BaseModel):
@@ -38,12 +39,22 @@ class Insight(BaseModel):
     status: Literal["healthy", "watch", "risk"]
 
 
+class ScoreBreakdownItem(BaseModel):
+    key: str
+    label: str
+    points: float
+    direction: BreakdownDirection
+    detail: str
+    percent_of_score: float = Field(ge=0, le=100)
+
+
 class AnalysisResponse(BaseModel):
     risk_label: RiskLabel
     risk_score: int = Field(ge=0, le=100)
     summary: str
     contributing_factors: list[str]
     insights: list[Insight]
+    score_breakdown: list[ScoreBreakdownItem]
     recommendations: list[Recommendation]
 
 

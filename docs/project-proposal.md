@@ -59,6 +59,184 @@ For example, if a student has several exams, long clinical hours, and poor sleep
 - Dashboard showing workload trends across the week
 - Simple wellness prompts related to sleep, breaks, and time balance
 
+---
+
+## Hackathon Upgrade: Make It Feel Like a Real Product
+
+This section upgrades Burnout Sentinel from “MVP demo” to “judge-ready product” with an explainable scoring model, real-time what-if simulation, actionable visualizations, polished UX, and standout features that create a “wow” moment.
+
+### 1) Intelligent Burnout Scoring Model (0–100)
+
+Goal: produce a realistic *planning* risk score that is:
+- **Explainable** (users can see why the score is high)
+- **Responsive** (small input changes move the score smoothly)
+- **Non-linear where it matters** (sleep/buffer deficits have outsized impact)
+- **Not diagnostic** (planning support only)
+
+#### Inputs (weekly aggregates)
+- Workload: total tasks, critical tasks, study hours, clinical hours, exams/checkoffs
+- Recovery: average sleep hours, weekly free/buffer hours
+- Baseline strain: self-reported stress (1–10)
+
+#### Model structure
+The score is computed in two layers:
+1) **Base risk (additive)**: workload demand + recovery deficit + stress signal
+2) **Amplifiers (multiplicative)**: low sleep and low buffer time *increase the impact* of demand
+
+This makes the reasoning intuitive:
+- “Your base workload is high.”
+- “Because sleep is low, the same workload hits harder.”
+
+#### Formula / pseudocode (explainable + realistic)
+
+**Normalize pressures (0–100):**
+
+```text
+taskPressure     = clamp(taskCount / 24, 0..1) * 100
+criticalPressure = clamp(criticalTasks / 8, 0..1) * 100
+loadPressure     = clamp((studyHours + clinicalHours) / 42, 0..1) * 100
+examPressure     = clamp(examCount / 3, 0..1) * 100
+clinicalPressure = clamp(clinicalHours / 20, 0..1) * 100
+
+sleepDeficitRatio  = clamp((8 - sleepHours) / 3, 0..1)
+sleepDeficit       = (sleepDeficitRatio ^ 1.7) * 100     # grows faster as sleep drops
+
+bufferDeficitRatio = clamp((16 - freeHours) / 16, 0..1)
+bufferDeficit      = (bufferDeficitRatio ^ 1.3) * 100    # grows as buffer shrinks
+
+stressSignal = clamp((stressLevel - 1) / 9, 0..1) * 100
+```
+
+**Demand + recovery deficit:**
+
+```text
+demandScore = 0.20*taskPressure
+           + 0.20*criticalPressure
+           + 0.30*loadPressure
+           + 0.15*examPressure
+           + 0.15*clinicalPressure
+
+recoveryDeficitScore = 0.65*sleepDeficit + 0.35*bufferDeficit
+```
+
+**Base risk (points that add up to a baseline):**
+
+```text
+baseRisk = 0.55*demandScore
+         + 0.30*recoveryDeficitScore
+         + 0.15*stressSignal
+```
+
+**Amplifiers (the “low sleep increases risk by X%” logic):**
+
+```text
+compressionRatio = clamp((taskCount - 16) / 12, 0..1)       # decision fatigue
+
+m_sleep       = 1 + 0.22*sleepDeficitRatio                  # +0..22%
+m_buffer      = 1 + 0.15*bufferDeficitRatio                 # +0..15%
+m_compression = 1 + 0.10*compressionRatio                   # +0..10%
+m_deadlines   = 1 + (examCount >= 2 ? 0.08 : 0)
+                 + ((examCount >= 2 && criticalTasks >= 5) ? 0.06 : 0)
+m_clinical    = 1 + 0.08*clamp((clinicalHours - 12) / 18, 0..1)
+
+riskScore = clamp(baseRisk * m_sleep * m_buffer * m_compression * m_deadlines * m_clinical, 0..100)
+```
+
+**Explainability output (what the UI shows)**
+- Base terms as **points**: demand points, recovery deficit points, stress points
+- Amplifiers as **% increases and added points**:
+  - “Sleep amplifier: +18% → +11 points”
+  - “Buffer-time amplifier: +9% → +5 points”
+
+To compute “added points” per amplifier, calculate the score sequentially and take deltas:
+
+```text
+s0 = baseRisk
+s1 = s0 * m_sleep       ; sleepEffect = s1 - s0
+s2 = s1 * m_buffer      ; bufferEffect = s2 - s1
+s3 = s2 * m_compression ; compressionEffect = s3 - s2
+s4 = s3 * m_deadlines   ; deadlinesEffect = s4 - s3
+s5 = s4 * m_clinical    ; clinicalEffect = s5 - s4
+final = clamp(s5, 0..100)
+```
+
+### 2) What-if Simulation (Key Feature)
+
+Goal: let users treat the planner like a **control panel**:
+- Drag sliders → **risk updates instantly**
+- Show “best first moves” automatically
+- Allow one-click application of suggested changes
+
+#### Improvement suggestion logic (simple optimizer)
+We define a small set of realistic “levers” (sleep, buffer time, reduce tasks, reduce critical tasks, reduce study hours). For each lever, we create small changes (deltas), then evaluate:
+- **single changes** (1 action)
+- **bundles** (2 actions like “sleep + reduce switching”)
+
+We rank candidates by *risk reduction per effort* and keep the top few.
+
+```text
+baselineScore = score(values)
+
+candidates = [
+  [+1h sleep], [+4h buffer], [-2 tasks], [-1 critical], [-4 study hours],
+  [+1h sleep & -2 tasks], [+4h buffer & -1 critical], [-3 study hours & +3h buffer]
+]
+
+for each candidate:
+  afterValues = applyAndClamp(values, candidate)
+  afterScore  = score(afterValues)
+  delta = baselineScore - afterScore
+  keep if delta >= threshold
+
+return topK by (delta / candidateCost)
+```
+
+UI output example:
+- “If you reduce **2 tasks** and sleep **+1h/night**, risk drops **76 → 52**.”
+
+### 3) Data Visualization Improvements (Make charts actionable)
+
+Replace “raw bar charts” with visuals that communicate thresholds and actions:
+
+1) **Metric gauges with bands**
+- Healthy / watch / risk bands embedded directly in each metric
+- Marker shows current value relative to targets
+
+2) **Risk trend line with threshold lines**
+- A small history line chart with horizontal lines at:
+  - Moderate threshold (40)
+  - High threshold (70)
+- Helps judges see: *“does it improve week over week?”*
+
+3) **Score breakdown list**
+- Show the largest contributors (points) so users know what to change first
+
+### 4) UX/UI Improvements (Input → analysis → insight → action)
+
+Make the experience feel “shipped”:
+- **Live updates** while sliders move (no extra “run” step needed for basic insight)
+- **Microinteractions**: subtle animations on score changes; risk badge transitions; quick “Apply changes” interactions
+- **Action-first layout**:
+  1) Inputs (left)
+  2) Score + breakdown (right)
+  3) What-if simulator (right)
+  4) Metric gauges + trend (right)
+
+### 5) “Wow factor” features (realistic for a hackathon)
+
+1) **Explainable scoring breakdown**
+- Judges can *see the math* and understand the logic immediately.
+
+2) **What-if simulator + auto improvement plans**
+- The app doesn’t just report a score — it proposes the best moves.
+
+3) **Trend tracking (local)**
+- “Save week snapshot” builds a personal risk trend line without needing accounts.
+
+Optional extensions (if time allows):
+- “Sensitivity view”: show which lever (sleep/buffer/tasks) gives the biggest score drop per unit.
+- “Calendar export (.ics)”: generate wellness blocks (sleep + buffer sessions) that students can import.
+
 ## Methodology
 
 ### 1. Project Design

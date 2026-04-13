@@ -6,6 +6,10 @@ import { type FieldPath, type UseFormReturn, useForm } from "react-hook-form";
 
 import { MetricChart } from "@/components/metric-chart";
 import { RiskPanel } from "@/components/risk-panel";
+import { TrendPanel } from "@/components/trend-panel";
+import { WhatIfPanel } from "@/components/what-if-panel";
+import { analyzePlannerInput } from "@/lib/analyzer";
+import { addSnapshot } from "@/lib/history";
 import {
   type AnalysisResponse,
   type Insight,
@@ -227,8 +231,11 @@ function MetricControl({
 }
 
 export function PlannerForm() {
-  const [result, setResult] = useState<AnalysisResponse | null>(null);
+  const [backendResult, setBackendResult] = useState<AnalysisResponse | null>(null);
+  const [backendInput, setBackendInput] = useState<PlannerFormValues | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [historyToken, setHistoryToken] = useState(0);
   const [analysisToken, setAnalysisToken] = useState(0);
   const [celebrateToken, setCelebrateToken] = useState(0);
   const [moderateToken, setModerateToken] = useState(0);
@@ -243,6 +250,36 @@ export function PlannerForm() {
 
   const isSubmitting = form.formState.isSubmitting;
   const values = form.watch();
+
+  const localResult = useMemo(
+    () => analyzePlannerInput(values),
+    [
+      values.week_name,
+      values.task_count,
+      values.high_priority_task_count,
+      values.estimated_task_hours,
+      values.exam_count,
+      values.clinical_hours,
+      values.average_sleep_hours,
+      values.stress_level,
+      values.free_hours
+    ]
+  );
+
+  const displayResult = useMemo(() => {
+    if (!backendResult || !backendInput) return localResult;
+    const same =
+      backendInput.week_name === values.week_name &&
+      backendInput.task_count === values.task_count &&
+      backendInput.high_priority_task_count === values.high_priority_task_count &&
+      backendInput.estimated_task_hours === values.estimated_task_hours &&
+      backendInput.exam_count === values.exam_count &&
+      backendInput.clinical_hours === values.clinical_hours &&
+      backendInput.average_sleep_hours === values.average_sleep_hours &&
+      backendInput.stress_level === values.stress_level &&
+      backendInput.free_hours === values.free_hours;
+    return same ? backendResult : localResult;
+  }, [backendResult, backendInput, localResult, values]);
 
   const fallbackInsights = useMemo<Insight[]>(
     () => [
@@ -302,7 +339,8 @@ export function PlannerForm() {
       }
 
       const payload: AnalysisResponse = await response.json();
-      setResult(payload);
+      setBackendInput(formValues);
+      setBackendResult(payload);
       setAnalysisToken((value) => value + 1);
     } catch (submitError) {
       const message =
@@ -432,15 +470,15 @@ export function PlannerForm() {
   }
 
   useEffect(() => {
-    if (!result || analysisToken === 0) return;
+    if (!displayResult || analysisToken === 0) return;
 
-    if (result.risk_label === "Low") {
+    if (displayResult.risk_label === "Low") {
       setCelebrateToken((value) => value + 1);
       playLowSound();
       return;
     }
 
-    if (result.risk_label === "Moderate") {
+    if (displayResult.risk_label === "Moderate") {
       setModerateToken((value) => value + 1);
       playModerateSound();
       return;
@@ -509,7 +547,8 @@ export function PlannerForm() {
                       type="button"
                       onClick={() => {
                         form.reset(preset.values);
-                        setResult(null);
+                        setBackendResult(null);
+                        setBackendInput(null);
                         setError(null);
                       }}
                       className="glass-button rounded-full px-3 py-2 text-sm font-semibold text-ink hover:border-emerald-200/70"
@@ -652,6 +691,25 @@ export function PlannerForm() {
               </div>
             ) : null}
 
+            {saveMessage ? (
+              <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/35 px-4 py-3 text-sm text-emerald-900 backdrop-blur-xl">
+                {saveMessage}
+              </div>
+            ) : null}
+
+            <button
+              type="button"
+              onClick={() => {
+                addSnapshot(values, displayResult);
+                setHistoryToken((value) => value + 1);
+                setSaveMessage("Snapshot saved to your trend history.");
+                window.setTimeout(() => setSaveMessage(null), 2200);
+              }}
+              className="glass-button inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-ink hover:border-emerald-200/70 active:translate-y-px"
+            >
+              Save week snapshot
+            </button>
+
             <button
               type="submit"
               disabled={isSubmitting}
@@ -673,12 +731,23 @@ export function PlannerForm() {
 
       <div className="space-y-6 xl:max-h-[calc(100vh-8.5rem)] xl:overflow-y-auto xl:pr-1">
         <RiskPanel
-          result={result}
+          result={displayResult}
           celebrateToken={celebrateToken}
           moderateToken={moderateToken}
           highToken={highToken}
         />
-        <MetricChart insights={result?.insights ?? fallbackInsights} />
+        <WhatIfPanel
+          values={values}
+          baselineScore={displayResult.risk_score}
+          onApply={(nextValues) => {
+            form.reset(nextValues);
+            setBackendResult(null);
+            setBackendInput(null);
+            setError(null);
+          }}
+        />
+        <MetricChart insights={displayResult.insights ?? fallbackInsights} />
+        <TrendPanel refreshToken={historyToken} />
       </div>
     </div>
   );

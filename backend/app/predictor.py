@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .models import Insight, PlannerInput, RiskLabel
+from .models import Insight, PlannerInput, RiskLabel, ScoreBreakdownItem
 
 
 @dataclass
@@ -11,6 +11,17 @@ class PredictionResult:
     risk_label: RiskLabel
     contributing_factors: list[str]
     insights: list[Insight]
+    score_breakdown: list[ScoreBreakdownItem]
+
+
+def _clamp(value: float, minimum: float, maximum: float) -> float:
+    return max(minimum, min(maximum, value))
+
+
+def _ratio(value: float, minimum: float, maximum: float) -> float:
+    if maximum <= minimum:
+        return 0.0
+    return _clamp((value - minimum) / (maximum - minimum), 0.0, 1.0)
 
 
 class BurnoutPredictor:
@@ -22,26 +33,69 @@ class BurnoutPredictor:
     """
 
     def predict(self, payload: PlannerInput) -> PredictionResult:
-        task_pressure = min(100.0, (payload.task_count / 24.0) * 100.0)
-        priority_pressure = min(100.0, (payload.high_priority_task_count / 8.0) * 100.0)
-        study_pressure = min(100.0, (payload.estimated_task_hours / 35.0) * 100.0)
-        exam_pressure = min(100.0, (payload.exam_count / 3.0) * 100.0)
-        clinical_pressure = min(100.0, (payload.clinical_hours / 18.0) * 100.0)
-        sleep_penalty = max(0.0, ((8.0 - payload.average_sleep_hours) / 3.0) * 100.0)
-        stress_signal = ((payload.stress_level - 1) / 9.0) * 100.0
-        recovery_penalty = max(0.0, ((14.0 - payload.free_hours) / 14.0) * 100.0)
+        # -------------------------
+        # 1) Build normalized signals
+        # -------------------------
+        # Demand-side pressures (0..100).
+        task_pressure = _ratio(payload.task_count, 0.0, 24.0) * 100.0
+        critical_pressure = _ratio(payload.high_priority_task_count, 0.0, 8.0) * 100.0
+        load_pressure = _ratio(payload.academic_load_hours, 0.0, 42.0) * 100.0
+        exam_pressure = _ratio(payload.exam_count, 0.0, 3.0) * 100.0
+        clinical_pressure = _ratio(payload.clinical_hours, 0.0, 20.0) * 100.0
 
-        weighted_score = (
-            (task_pressure * 0.18)
-            + (priority_pressure * 0.12)
-            + (study_pressure * 0.16)
-            + (exam_pressure * 0.12)
-            + (clinical_pressure * 0.12)
-            + (sleep_penalty * 0.14)
-            + (stress_signal * 0.12)
-            + (recovery_penalty * 0.04)
+        # Recovery deficits (0..100) with a gentle nonlinearity so low sleep ramps faster.
+        sleep_deficit_ratio = _ratio(8.0 - payload.average_sleep_hours, 0.0, 3.0)
+        sleep_deficit = (sleep_deficit_ratio**1.7) * 100.0
+        buffer_deficit_ratio = _ratio(16.0 - payload.free_hours, 0.0, 16.0)
+        buffer_deficit = (buffer_deficit_ratio**1.3) * 100.0
+
+        stress_signal = _ratio(payload.stress_level - 1.0, 0.0, 9.0) * 100.0
+
+        # -------------------------
+        # 2) Base risk (additive, explainable)
+        # -------------------------
+        demand_score = (
+            (task_pressure * 0.20)
+            + (critical_pressure * 0.20)
+            + (load_pressure * 0.30)
+            + (exam_pressure * 0.15)
+            + (clinical_pressure * 0.15)
         )
-        risk_score = max(0, min(100, round(weighted_score)))
+        recovery_deficit_score = (sleep_deficit * 0.65) + (buffer_deficit * 0.35)
+
+        # Base risk is intentionally linear: you can explain it to a judge in one sentence.
+        demand_term = demand_score * 0.55
+        recovery_term = recovery_deficit_score * 0.30
+        stress_term = stress_signal * 0.15
+        base_risk = _clamp(demand_term + recovery_term + stress_term, 0.0, 100.0)
+
+        # -------------------------
+        # 3) Multipliers (where "low sleep increases risk by X%" comes from)
+        # -------------------------
+        compression_ratio = _ratio(payload.task_count - 16.0, 0.0, 12.0)
+
+        m_sleep = 1.0 + (0.22 * sleep_deficit_ratio)
+        m_buffer = 1.0 + (0.15 * buffer_deficit_ratio)
+        m_compression = 1.0 + (0.10 * compression_ratio)
+        m_deadlines = 1.0 + (0.08 if payload.exam_count >= 2 else 0.0) + (0.06 if (payload.exam_count >= 2 and payload.high_priority_task_count >= 5) else 0.0)
+        m_clinical = 1.0 + (0.08 * _ratio(payload.clinical_hours - 12.0, 0.0, 18.0))
+
+        score_after_sleep = base_risk * m_sleep
+        sleep_effect = score_after_sleep - base_risk
+
+        score_after_buffer = score_after_sleep * m_buffer
+        buffer_effect = score_after_buffer - score_after_sleep
+
+        score_after_compression = score_after_buffer * m_compression
+        compression_effect = score_after_compression - score_after_buffer
+
+        score_after_deadlines = score_after_compression * m_deadlines
+        deadlines_effect = score_after_deadlines - score_after_compression
+
+        score_after_clinical = score_after_deadlines * m_clinical
+        clinical_effect = score_after_clinical - score_after_deadlines
+
+        risk_score = int(round(_clamp(score_after_clinical, 0.0, 100.0)))
 
         if risk_score >= 70:
             risk_label: RiskLabel = "High"
@@ -50,26 +104,25 @@ class BurnoutPredictor:
         else:
             risk_label = "Low"
 
-        contributing_factors: list[str] = []
-        if payload.task_count >= 20:
-            contributing_factors.append("High task count is crowding the week.")
-        if payload.high_priority_task_count >= 5:
-            contributing_factors.append("Too many high-priority tasks are competing for attention.")
-        if payload.estimated_task_hours >= 30:
-            contributing_factors.append("Study and assignment hours are stacking up quickly.")
-        if payload.exam_count >= 2:
-            contributing_factors.append("Multiple exams create a concentrated stress spike.")
-        if payload.clinical_hours >= 16:
-            contributing_factors.append("Clinical hours reduce recovery time and scheduling flexibility.")
-        if payload.average_sleep_hours < 7:
-            contributing_factors.append("Sleep is below the recommended range for sustained focus.")
-        if payload.stress_level >= 7:
-            contributing_factors.append("Self-reported stress is already elevated.")
-        if payload.free_hours < 10:
-            contributing_factors.append("There is very little buffer time left in the week.")
+        score_breakdown = self._build_breakdown(
+            risk_score=risk_score,
+            demand_term=demand_term,
+            recovery_term=recovery_term,
+            stress_term=stress_term,
+            sleep_effect=sleep_effect,
+            buffer_effect=buffer_effect,
+            compression_effect=compression_effect,
+            deadlines_effect=deadlines_effect,
+            clinical_effect=clinical_effect,
+            payload=payload,
+            m_sleep=m_sleep,
+            m_buffer=m_buffer,
+            m_compression=m_compression,
+            m_deadlines=m_deadlines,
+            m_clinical=m_clinical,
+        )
 
-        if not contributing_factors:
-            contributing_factors.append("The current workload looks balanced overall.")
+        contributing_factors = self._build_contributing_factors(payload, score_breakdown)
 
         insights = [
             self._build_insight(
@@ -114,7 +167,132 @@ class BurnoutPredictor:
             risk_label=risk_label,
             contributing_factors=contributing_factors,
             insights=insights,
+            score_breakdown=score_breakdown,
         )
+
+    def _build_contributing_factors(
+        self, payload: PlannerInput, breakdown: list[ScoreBreakdownItem]
+    ) -> list[str]:
+        drivers = [item for item in breakdown if item.direction in ("risk", "multiplier") and item.points >= 3.0]
+        drivers = sorted(drivers, key=lambda item: item.points, reverse=True)[:4]
+
+        factors = [item.detail for item in drivers]
+        if not factors:
+            factors.append("The current workload looks balanced overall.")
+
+        if payload.average_sleep_hours < 6.5 and all("Sleep" not in f for f in factors):
+            factors.append("Sleep is low enough to amplify workload stress.")
+
+        return factors
+
+    def _build_breakdown(
+        self,
+        *,
+        risk_score: int,
+        demand_term: float,
+        recovery_term: float,
+        stress_term: float,
+        sleep_effect: float,
+        buffer_effect: float,
+        compression_effect: float,
+        deadlines_effect: float,
+        clinical_effect: float,
+        payload: PlannerInput,
+        m_sleep: float,
+        m_buffer: float,
+        m_compression: float,
+        m_deadlines: float,
+        m_clinical: float,
+    ) -> list[ScoreBreakdownItem]:
+        score = max(1, risk_score)
+
+        def pct(points: float) -> float:
+            return round(_clamp((abs(points) / score) * 100.0, 0.0, 100.0), 1)
+
+        items: list[ScoreBreakdownItem] = [
+            ScoreBreakdownItem(
+                key="demand",
+                label="Workload demand",
+                points=round(demand_term, 1),
+                direction="risk",
+                percent_of_score=pct(demand_term),
+                detail=(
+                    "Hours, tasks, exams, and clinical load combine into a demand baseline."
+                ),
+            ),
+            ScoreBreakdownItem(
+                key="recovery",
+                label="Recovery deficit",
+                points=round(recovery_term, 1),
+                direction="risk",
+                percent_of_score=pct(recovery_term),
+                detail=(
+                    "Less sleep and less free time reduce the week’s recovery capacity."
+                ),
+            ),
+            ScoreBreakdownItem(
+                key="stress",
+                label="Current stress signal",
+                points=round(stress_term, 1),
+                direction="risk",
+                percent_of_score=pct(stress_term),
+                detail="Self-reported stress raises the baseline risk for this week.",
+            ),
+            ScoreBreakdownItem(
+                key="mult_sleep",
+                label="Sleep amplifier",
+                points=round(sleep_effect, 1),
+                direction="multiplier",
+                percent_of_score=pct(sleep_effect),
+                detail=(
+                    f"Avg sleep {payload.average_sleep_hours:.1f}h applies ~{round((m_sleep - 1.0) * 100)}% amplification."
+                ),
+            ),
+            ScoreBreakdownItem(
+                key="mult_buffer",
+                label="Buffer-time amplifier",
+                points=round(buffer_effect, 1),
+                direction="multiplier",
+                percent_of_score=pct(buffer_effect),
+                detail=(
+                    f"Open buffer {payload.free_hours:.1f}h applies ~{round((m_buffer - 1.0) * 100)}% amplification."
+                ),
+            ),
+            ScoreBreakdownItem(
+                key="mult_compression",
+                label="Context-switching amplifier",
+                points=round(compression_effect, 1),
+                direction="multiplier",
+                percent_of_score=pct(compression_effect),
+                detail=(
+                    f"High task count ({payload.task_count}) adds ~{round((m_compression - 1.0) * 100)}% decision fatigue."
+                ),
+            ),
+            ScoreBreakdownItem(
+                key="mult_deadlines",
+                label="Deadline clustering amplifier",
+                points=round(deadlines_effect, 1),
+                direction="multiplier",
+                percent_of_score=pct(deadlines_effect),
+                detail=(
+                    f"Exams/checkoffs ({payload.exam_count}) apply ~{round((m_deadlines - 1.0) * 100)}% deadline pressure."
+                ),
+            ),
+            ScoreBreakdownItem(
+                key="mult_clinical",
+                label="Clinical intensity amplifier",
+                points=round(clinical_effect, 1),
+                direction="multiplier",
+                percent_of_score=pct(clinical_effect),
+                detail=(
+                    f"Clinical hours ({payload.clinical_hours:.1f}h) apply ~{round((m_clinical - 1.0) * 100)}% fatigue overhead."
+                ),
+            ),
+        ]
+
+        # Drop tiny/noise items for readability.
+        filtered = [item for item in items if abs(item.points) >= 0.5]
+        return filtered
 
     def _build_insight(
         self,

@@ -34,6 +34,21 @@ const priorityStyles = {
   low: "border-emerald-200/60 bg-emerald-50/35 text-emerald-900"
 } as const;
 
+const breakdownStyles = {
+  risk: {
+    pill: "bg-rose-50/40 text-rose-900 ring-rose-200/60",
+    bar: "from-rose-500/80 to-rose-300/30"
+  },
+  multiplier: {
+    pill: "bg-violet-50/40 text-violet-900 ring-violet-200/60",
+    bar: "from-violet-500/80 to-violet-300/30"
+  },
+  protective: {
+    pill: "bg-emerald-50/40 text-emerald-900 ring-emerald-200/60",
+    bar: "from-emerald-500/80 to-emerald-300/30"
+  }
+} as const;
+
 function ReactionBurst({ variant }: { variant: "low" | "moderate" | "high" }) {
   const count = variant === "low" ? 18 : variant === "high" ? 16 : 14;
 
@@ -54,7 +69,8 @@ function MethodDetails() {
       </summary>
       <div className="mt-3 space-y-3 leading-6">
         <p>
-          This is an explainable demo score (0–100) based on workload + recovery signals. It is not a medical
+          This is an explainable demo score (0–100) based on workload + recovery signals. Recovery factors can
+          also amplify risk (for example, low sleep increases the impact of high workload). It is not a medical
           diagnosis.
         </p>
         <div className="surface-shell p-3">
@@ -105,6 +121,51 @@ function MethodDetails() {
         </div>
       </div>
     </details>
+  );
+}
+
+function ScoreBreakdown({ result }: { result: AnalysisResponse }) {
+  const items = [...result.score_breakdown].sort((a, b) => b.points - a.points);
+
+  return (
+    <div className="card">
+      <h3 className="text-lg font-semibold text-ink">How the score adds up</h3>
+      <p className="mt-2 text-sm leading-6 text-slate-700">
+        Each item shows the points added to the 0–100 score (plus amplifiers that increase the baseline).
+      </p>
+
+      <div className="mt-4 space-y-2">
+        {items.map((item) => (
+          <div key={item.key} className="glass-stat px-4 py-3">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div className="min-w-0">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span
+                    className={`glass-pill px-3 py-1 text-[10px] uppercase tracking-[0.2em] ring-1 ${breakdownStyles[item.direction].pill}`}
+                  >
+                    {item.direction}
+                  </span>
+                  <p className="font-semibold text-ink">{item.label}</p>
+                </div>
+                <p className="mt-2 text-sm leading-6 text-slate-700">{item.detail}</p>
+              </div>
+
+              <div className="shrink-0 text-right">
+                <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">Points</p>
+                <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">{item.points}</p>
+              </div>
+            </div>
+
+            <div className="mt-3 h-2 rounded-full bg-white/30">
+              <div
+                className={`h-2 rounded-full bg-gradient-to-r transition-[width] duration-500 ease-out motion-reduce:transition-none ${breakdownStyles[item.direction].bar}`}
+                style={{ width: `${item.percent_of_score}%` }}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -190,16 +251,7 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
 
       <div className="surface-shell p-1">
         <div className="grid gap-1 p-1 lg:grid-cols-2">
-          <div className="card">
-            <h3 className="text-lg font-semibold text-ink">What is driving the score?</h3>
-            <ul className="mt-4 space-y-2 text-sm leading-7 text-slate-700">
-              {result.contributing_factors.map((factor) => (
-                <li key={factor} className="glass-stat px-4 py-3 text-sm leading-6 text-slate-800">
-                  {factor}
-                </li>
-              ))}
-            </ul>
-          </div>
+          <ScoreBreakdown result={result} />
 
           <div className="card">
             <h3 className="text-lg font-semibold text-ink">Recommended next steps</h3>

@@ -59,5 +59,6 @@ def analyze_schedule(payload: PlannerInput) -> AnalysisResponse:
         summary=summary,
         contributing_factors=prediction.contributing_factors,
         insights=prediction.insights,
+        score_breakdown=prediction.score_breakdown,
         recommendations=recommendations,
     )

@@ -320,6 +320,50 @@ input[type="number"] {
   }
 }
 
+.ambient-layer {
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.ambient-gradient {
+  opacity: 0.9;
+  background-image:
+    radial-gradient(1200px 900px at 46% 28%, rgba(255, 255, 255, 0.75), transparent 62%),
+    radial-gradient(1000px 760px at 54% 74%, rgba(255, 255, 255, 0.5), transparent 66%),
+    radial-gradient(circle at 14% 18%, rgba(47, 143, 112, 0.12), transparent 36%),
+    radial-gradient(circle at 88% 16%, rgba(232, 168, 117, 0.12), transparent 34%),
+    radial-gradient(circle at 26% 84%, rgba(86, 201, 197, 0.08), transparent 42%);
+  background-size: 160% 160%;
+  background-position: 44% 28%, 56% 74%, 40% 35%, 60% 35%, 48% 62%;
+  animation: ambient-gradient-shift 28s ease-in-out infinite alternate;
+}
+
+.ambient-blob {
+  border-radius: 9999px;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+  animation: ambient-breathe 12s ease-in-out infinite alternate;
+}
+
+@keyframes ambient-gradient-shift {
+  0% {
+    background-position: 42% 26%, 58% 76%, 38% 34%, 62% 34%, 46% 60%;
+  }
+  100% {
+    background-position: 54% 32%, 46% 70%, 46% 38%, 56% 32%, 52% 66%;
+  }
+}
+
+@keyframes ambient-breathe {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.84;
+  }
+}
+
 .reaction-burst {
   position: absolute;
   left: 50%;

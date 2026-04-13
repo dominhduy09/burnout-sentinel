@@ -1,4 +1,13 @@
-import type { AnalysisResponse, Insight, PlannerFormValues } from "@/lib/types";
+import type { AnalysisResponse, Insight, PlannerFormValues, ScoreBreakdownItem } from "@/lib/types";
+
+function clamp(value: number, minimum: number, maximum: number) {
+  return Math.max(minimum, Math.min(maximum, value));
+}
+
+function ratio(value: number, minimum: number, maximum: number) {
+  if (maximum <= minimum) return 0;
+  return clamp((value - minimum) / (maximum - minimum), 0, 1);
+}
 
 function buildInsight(
   label: string,
@@ -45,62 +54,144 @@ function buildInverseInsight(
 }
 
 export function analyzePlannerInput(payload: PlannerFormValues): AnalysisResponse {
-  const taskPressure = Math.min(100, (payload.task_count / 24) * 100);
-  const priorityPressure = Math.min(100, (payload.high_priority_task_count / 8) * 100);
-  const studyPressure = Math.min(100, (payload.estimated_task_hours / 35) * 100);
-  const examPressure = Math.min(100, (payload.exam_count / 3) * 100);
-  const clinicalPressure = Math.min(100, (payload.clinical_hours / 18) * 100);
-  const sleepPenalty = Math.max(0, ((8 - payload.average_sleep_hours) / 3) * 100);
-  const stressSignal = ((payload.stress_level - 1) / 9) * 100;
-  const recoveryPenalty = Math.max(0, ((14 - payload.free_hours) / 14) * 100);
+  const academicLoadHours = payload.estimated_task_hours + payload.clinical_hours;
 
-  const riskScore = Math.max(
-    0,
-    Math.min(
-      100,
-      Math.round(
-        taskPressure * 0.18 +
-          priorityPressure * 0.12 +
-          studyPressure * 0.16 +
-          examPressure * 0.12 +
-          clinicalPressure * 0.12 +
-          sleepPenalty * 0.14 +
-          stressSignal * 0.12 +
-          recoveryPenalty * 0.04
-      )
-    )
-  );
+  const taskPressure = ratio(payload.task_count, 0, 24) * 100;
+  const criticalPressure = ratio(payload.high_priority_task_count, 0, 8) * 100;
+  const loadPressure = ratio(academicLoadHours, 0, 42) * 100;
+  const examPressure = ratio(payload.exam_count, 0, 3) * 100;
+  const clinicalPressure = ratio(payload.clinical_hours, 0, 20) * 100;
+
+  const sleepDeficitRatio = ratio(8 - payload.average_sleep_hours, 0, 3);
+  const sleepDeficit = Math.pow(sleepDeficitRatio, 1.7) * 100;
+  const bufferDeficitRatio = ratio(16 - payload.free_hours, 0, 16);
+  const bufferDeficit = Math.pow(bufferDeficitRatio, 1.3) * 100;
+  const stressSignal = ratio(payload.stress_level - 1, 0, 9) * 100;
+
+  const demandScore =
+    taskPressure * 0.2 +
+    criticalPressure * 0.2 +
+    loadPressure * 0.3 +
+    examPressure * 0.15 +
+    clinicalPressure * 0.15;
+
+  const recoveryDeficitScore = sleepDeficit * 0.65 + bufferDeficit * 0.35;
+
+  const demandTerm = demandScore * 0.55;
+  const recoveryTerm = recoveryDeficitScore * 0.3;
+  const stressTerm = stressSignal * 0.15;
+  const baseRisk = clamp(demandTerm + recoveryTerm + stressTerm, 0, 100);
+
+  const compressionRatio = ratio(payload.task_count - 16, 0, 12);
+
+  const mSleep = 1 + 0.22 * sleepDeficitRatio;
+  const mBuffer = 1 + 0.15 * bufferDeficitRatio;
+  const mCompression = 1 + 0.1 * compressionRatio;
+  const mDeadlines =
+    1 + (payload.exam_count >= 2 ? 0.08 : 0) + (payload.exam_count >= 2 && payload.high_priority_task_count >= 5 ? 0.06 : 0);
+  const mClinical = 1 + 0.08 * ratio(payload.clinical_hours - 12, 0, 18);
+
+  const scoreAfterSleep = baseRisk * mSleep;
+  const sleepEffect = scoreAfterSleep - baseRisk;
+
+  const scoreAfterBuffer = scoreAfterSleep * mBuffer;
+  const bufferEffect = scoreAfterBuffer - scoreAfterSleep;
+
+  const scoreAfterCompression = scoreAfterBuffer * mCompression;
+  const compressionEffect = scoreAfterCompression - scoreAfterBuffer;
+
+  const scoreAfterDeadlines = scoreAfterCompression * mDeadlines;
+  const deadlinesEffect = scoreAfterDeadlines - scoreAfterCompression;
+
+  const scoreAfterClinical = scoreAfterDeadlines * mClinical;
+  const clinicalEffect = scoreAfterClinical - scoreAfterDeadlines;
+
+  const riskScore = Math.round(clamp(scoreAfterClinical, 0, 100));
 
   const riskLabel: AnalysisResponse["risk_label"] =
     riskScore >= 70 ? "High" : riskScore >= 40 ? "Moderate" : "Low";
 
-  const contributingFactors: string[] = [];
-  if (payload.task_count >= 20) {
-    contributingFactors.push("High task count is crowding the week.");
-  }
-  if (payload.high_priority_task_count >= 5) {
-    contributingFactors.push("Too many high-priority tasks are competing for attention.");
-  }
-  if (payload.estimated_task_hours >= 30) {
-    contributingFactors.push("Study and assignment hours are stacking up quickly.");
-  }
-  if (payload.exam_count >= 2) {
-    contributingFactors.push("Multiple exams create a concentrated stress spike.");
-  }
-  if (payload.clinical_hours >= 16) {
-    contributingFactors.push("Clinical hours reduce recovery time and scheduling flexibility.");
-  }
-  if (payload.average_sleep_hours < 7) {
-    contributingFactors.push("Sleep is below the recommended range for sustained focus.");
-  }
-  if (payload.stress_level >= 7) {
-    contributingFactors.push("Self-reported stress is already elevated.");
-  }
-  if (payload.free_hours < 10) {
-    contributingFactors.push("There is very little buffer time left in the week.");
-  }
-  if (!contributingFactors.length) {
-    contributingFactors.push("The current workload looks balanced overall.");
+  const scoreForPercent = Math.max(1, riskScore);
+  const percentOfScore = (points: number) => clamp((Math.abs(points) / scoreForPercent) * 100, 0, 100);
+
+  const breakdownItems: ScoreBreakdownItem[] = [
+    {
+      key: "demand",
+      label: "Workload demand",
+      points: Number(demandTerm.toFixed(1)),
+      direction: "risk",
+      percent_of_score: Number(percentOfScore(demandTerm).toFixed(1)),
+      detail: "Hours, tasks, exams, and clinical load combine into a demand baseline."
+    },
+    {
+      key: "recovery",
+      label: "Recovery deficit",
+      points: Number(recoveryTerm.toFixed(1)),
+      direction: "risk",
+      percent_of_score: Number(percentOfScore(recoveryTerm).toFixed(1)),
+      detail: "Less sleep and less free time reduce the week’s recovery capacity."
+    },
+    {
+      key: "stress",
+      label: "Current stress signal",
+      points: Number(stressTerm.toFixed(1)),
+      direction: "risk",
+      percent_of_score: Number(percentOfScore(stressTerm).toFixed(1)),
+      detail: "Self-reported stress raises the baseline risk for this week."
+    },
+    {
+      key: "mult_sleep",
+      label: "Sleep amplifier",
+      points: Number(sleepEffect.toFixed(1)),
+      direction: "multiplier",
+      percent_of_score: Number(percentOfScore(sleepEffect).toFixed(1)),
+      detail: `Avg sleep ${payload.average_sleep_hours.toFixed(1)}h applies ~${Math.round((mSleep - 1) * 100)}% amplification.`
+    },
+    {
+      key: "mult_buffer",
+      label: "Buffer-time amplifier",
+      points: Number(bufferEffect.toFixed(1)),
+      direction: "multiplier",
+      percent_of_score: Number(percentOfScore(bufferEffect).toFixed(1)),
+      detail: `Open buffer ${payload.free_hours.toFixed(1)}h applies ~${Math.round((mBuffer - 1) * 100)}% amplification.`
+    },
+    {
+      key: "mult_compression",
+      label: "Context-switching amplifier",
+      points: Number(compressionEffect.toFixed(1)),
+      direction: "multiplier",
+      percent_of_score: Number(percentOfScore(compressionEffect).toFixed(1)),
+      detail: `High task count (${payload.task_count}) adds ~${Math.round((mCompression - 1) * 100)}% decision fatigue.`
+    },
+    {
+      key: "mult_deadlines",
+      label: "Deadline clustering amplifier",
+      points: Number(deadlinesEffect.toFixed(1)),
+      direction: "multiplier",
+      percent_of_score: Number(percentOfScore(deadlinesEffect).toFixed(1)),
+      detail: `Exams/checkoffs (${payload.exam_count}) apply ~${Math.round((mDeadlines - 1) * 100)}% deadline pressure.`
+    },
+    {
+      key: "mult_clinical",
+      label: "Clinical intensity amplifier",
+      points: Number(clinicalEffect.toFixed(1)),
+      direction: "multiplier",
+      percent_of_score: Number(percentOfScore(clinicalEffect).toFixed(1)),
+      detail: `Clinical hours (${payload.clinical_hours.toFixed(1)}h) apply ~${Math.round((mClinical - 1) * 100)}% fatigue overhead.`
+    }
+  ];
+
+  const breakdown = breakdownItems.filter((item) => Math.abs(item.points) >= 0.5);
+
+  const contributingFactors: string[] = breakdown
+    .filter((item) => (item.direction === "risk" || item.direction === "multiplier") && item.points >= 3)
+    .sort((a, b) => b.points - a.points)
+    .slice(0, 4)
+    .map((item) => item.detail);
+
+  if (!contributingFactors.length) contributingFactors.push("The current workload looks balanced overall.");
+  if (payload.average_sleep_hours < 6.5 && !contributingFactors.some((item) => item.includes("sleep"))) {
+    contributingFactors.push("Sleep is low enough to amplify workload stress.");
   }
 
   const recommendations: AnalysisResponse["recommendations"] = [];
@@ -157,7 +248,7 @@ export function analyzePlannerInput(payload: PlannerFormValues): AnalysisRespons
   const insights: Insight[] = [
     buildInsight("Task Load", payload.task_count, 16, 22, "tasks"),
     buildInsight("Priority Tasks", payload.high_priority_task_count, 3, 5, "tasks"),
-    buildInsight("Work Hours", payload.estimated_task_hours + payload.clinical_hours, 28, 40, "hours"),
+    buildInsight("Work Hours", academicLoadHours, 28, 40, "hours"),
     buildInverseInsight("Sleep", payload.average_sleep_hours, 7.5, 6.5, "hours/night"),
     buildInverseInsight("Free Time", payload.free_hours, 16, 10, "hours/week")
   ];
@@ -175,6 +266,7 @@ export function analyzePlannerInput(payload: PlannerFormValues): AnalysisRespons
     summary,
     contributing_factors: contributingFactors,
     insights,
+    score_breakdown: breakdown,
     recommendations: recommendations.slice(0, 4),
     analysis_source: "local"
   };

@@ -26,12 +26,22 @@ export type Insight = {
   status: "healthy" | "watch" | "risk";
 };
 
+export type ScoreBreakdownItem = {
+  key: string;
+  label: string;
+  points: number;
+  direction: "risk" | "protective" | "multiplier";
+  detail: string;
+  percent_of_score: number;
+};
+
 export type AnalysisResponse = {
   risk_label: "Low" | "Moderate" | "High";
   risk_score: number;
   summary: string;
   contributing_factors: string[];
   insights: Insight[];
+  score_breakdown: ScoreBreakdownItem[];
   recommendations: Recommendation[];
   analysis_source?: "backend" | "local";
 };
