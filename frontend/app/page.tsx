@@ -8,19 +8,20 @@ export default function HomePage() {
       <AmbientBackground />
 
       <section className="relative border-b border-white/50 backdrop-blur-xl">
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,0.9fr)] lg:px-8 lg:py-12">
-          <div className="min-w-0 max-w-3xl space-y-6">
+        <div className="relative mx-auto rounded-[32px] border border-white/50 bg-white/18 px-5 py-6 shadow-card backdrop-blur-xl sm:px-6 sm:py-7 lg:max-w-7xl lg:px-8 lg:py-8">
+          <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] lg:gap-8 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)]">
+          <div className="min-w-0 max-w-2xl space-y-5">
             <p className="eyebrow">UAB Student Wellness Concept</p>
-            <h1 className="text-balance text-3xl font-semibold tracking-tight text-ink sm:text-4xl lg:text-[3.2rem] lg:leading-[1.06]">
+            <h1 className="text-balance text-3xl font-semibold tracking-tight text-ink sm:text-[2.65rem] sm:leading-[1.08] lg:text-[3.05rem] lg:leading-[1.04]">
               A planner that catches burnout before the week gets out of control.
             </h1>
-            <p className="reading-copy max-w-2xl text-sm sm:text-base">
+            <p className="reading-copy max-w-xl text-sm sm:text-[15px] lg:text-base">
               Built for students dealing with packed schedules, overlapping deadlines, work, labs, clinicals,
               and personal responsibilities. The planner translates one busy week into a clearer picture of
               overload, recovery, and what to change first.
             </p>
 
-            <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
+            <div className="flex flex-wrap gap-2.5 text-xs sm:text-sm">
               <span className="chip">Weekly workload analysis</span>
               <span className="chip">Burnout risk scoring</span>
               <span className="chip">Personalized planning advice</span>
@@ -28,6 +29,7 @@ export default function HomePage() {
           </div>
 
           <ResearchRotator />
+          </div>
         </div>
       </section>
 

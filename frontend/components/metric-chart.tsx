@@ -112,12 +112,12 @@ export const MetricChart = memo(function MetricChart({ insights }: Props) {
       <div className="panel-header">
         <div className="absolute inset-0 glass-grain" />
         <div className="relative">
-          <h3 className="text-lg font-semibold text-ink">Workload Snapshot</h3>
-          <p className="mt-1 text-sm leading-6 text-slate-700">
+          <h3 className="text-xl font-semibold text-ink">Workload Snapshot</h3>
+          <p className="mt-2 text-[15px] leading-7 text-slate-700">
             These gauges show which metrics are in the healthy zone, watch zone, or risk zone.
           </p>
 
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="mt-5 flex flex-wrap gap-2.5">
             {insights.map((insight) => (
               <div
                 key={insight.label}
@@ -132,7 +132,7 @@ export const MetricChart = memo(function MetricChart({ insights }: Props) {
         </div>
       </div>
 
-      <div className="space-y-3 px-6 py-5">
+      <div className="space-y-4 px-7 py-6">
         {insights.map((insight) => {
           const spec = METRIC_SPECS[insight.label];
           if (!spec) {

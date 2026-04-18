@@ -18,23 +18,23 @@ export const WhatIfPanel = memo(function WhatIfPanel({ values, baselineScore, on
       <div className="panel-header">
         <div className="absolute inset-0 glass-grain" />
         <div className="relative">
-          <h3 className="text-lg font-semibold text-ink">What-if simulator</h3>
-          <p className="mt-1 text-sm leading-6 text-slate-700">
+          <h3 className="text-xl font-semibold text-ink">What-if simulator</h3>
+          <p className="mt-2 text-[15px] leading-7 text-slate-700">
             Try a change and see the risk score update instantly. These are the highest-impact moves for this
             week.
           </p>
         </div>
       </div>
 
-      <div className="space-y-3 px-6 py-5">
+      <div className="space-y-4 px-7 py-6">
         {suggestions.length ? (
           suggestions.map((suggestion) => (
-            <div key={suggestion.title} className="glass-stat px-4 py-3">
+            <div key={suggestion.title} className="glass-stat px-5 py-4">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="min-w-0">
                   <p className="font-semibold text-ink">{suggestion.title}</p>
-                  <p className="mt-1 text-sm leading-6 text-slate-700">{suggestion.rationale}</p>
-                  <ul className="mt-3 space-y-1 text-sm text-slate-700">
+                  <p className="mt-2 text-[15px] leading-7 text-slate-700">{suggestion.rationale}</p>
+                  <ul className="mt-3 space-y-1.5 text-[15px] leading-7 text-slate-700">
                     {suggestion.changes.map((change) => (
                       <li key={`${change.field}-${change.delta}`} className="flex items-center justify-between gap-3">
                         <span className="truncate">{change.label}</span>
@@ -49,10 +49,10 @@ export const WhatIfPanel = memo(function WhatIfPanel({ values, baselineScore, on
 
                 <div className="shrink-0 text-right">
                   <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">Risk change</p>
-                  <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">
+                  <p className="mt-1 text-[1.65rem] font-semibold tabular-nums text-ink">
                     {baselineScore} → {suggestion.afterScore}
                   </p>
-                  <p className="mt-1 text-sm font-semibold text-emerald-800">
+                  <p className="mt-1 text-[15px] font-semibold text-emerald-800">
                     -{suggestion.deltaScore} points
                   </p>
                 </div>

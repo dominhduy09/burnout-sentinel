@@ -588,8 +588,16 @@ export function PlannerForm() {
     values.high_priority_task_count > 5 ? "risk" : values.high_priority_task_count > 3 ? "watch" : "healthy";
   const bufferStatus = values.free_hours < 10 ? "risk" : values.free_hours < 16 ? "watch" : "healthy";
 
+  const liveTotalTitle = totalLoadStatus === "risk" ? "Overloaded" : totalLoadStatus === "watch" ? "Heavy week" : "Balanced";
+  const liveTotalHint =
+    totalLoadStatus === "risk"
+      ? "Consider reducing study or clinical load this week."
+      : totalLoadStatus === "watch"
+        ? "Watch recovery time and protect sleep."
+        : "This load looks manageable with current recovery.";
+
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] xl:items-start">
+    <div className="grid gap-8 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:items-start 2xl:grid-cols-[minmax(0,0.76fr)_minmax(0,1.24fr)]">
       <div className="min-w-0">
         <div className="card overflow-hidden p-0">
           <div className="panel-header">
@@ -602,9 +610,25 @@ export function PlannerForm() {
                   Adjust the schedule like a control panel, then see how the week changes.
                 </p>
               </div>
-              <div className="glass-stat text-right">
-                <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">Live Total</p>
-                <p className="mt-1 text-2xl font-semibold tabular-nums text-ink">{totalLoad}h</p>
+              <div className="glass-stat w-full sm:w-auto sm:min-w-[196px]">
+                <div className="flex items-center justify-between gap-2">
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">Live Total</p>
+                  <span className={`h-2 w-2 rounded-full ${statStyleByStatus[totalLoadStatus].dot}`} />
+                </div>
+                <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight text-ink">
+                  {totalLoad}
+                  <span className="ml-1 text-sm font-semibold text-stone-600">h</span>
+                </p>
+                <p className={`mt-1 text-xs font-semibold uppercase tracking-[0.14em] ${statStyleByStatus[totalLoadStatus].label}`}>
+                  {liveTotalTitle}
+                </p>
+                <div className="mt-2 h-1.5 rounded-full bg-white/35">
+                  <div
+                    className={`h-1.5 rounded-full bg-gradient-to-r ${statStyleByStatus[totalLoadStatus].bar}`}
+                    style={{ width: `${clampPercent(totalLoad, 60)}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-xs leading-6 text-slate-600">{liveTotalHint}</p>
               </div>
             </div>
           </div>
@@ -805,7 +829,7 @@ export function PlannerForm() {
         </div>
       </div>
 
-      <div className="min-w-0 grid gap-4 xl:grid-cols-2 xl:pr-0">
+      <div className="min-w-0 grid gap-5 lg:grid-cols-2 xl:pr-0">
         {panelOrder.map((panelKey) => {
           const spanClass = panelKey === "risk" || panelKey === "whatif" ? "xl:col-span-2" : "xl:col-span-1";
 
@@ -832,8 +856,8 @@ export function PlannerForm() {
               }}
               className={`min-w-0 ${spanClass} ${draggedPanel === panelKey ? "opacity-70" : ""}`}
             >
-              <div className="mb-2 flex items-center justify-between px-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+              <div className="mb-3 flex items-center justify-between px-1">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
                   {panelLabelByKey[panelKey]}
                 </p>
                 <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Drag to move</span>

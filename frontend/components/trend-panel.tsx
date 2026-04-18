@@ -46,8 +46,8 @@ export const TrendPanel = memo(function TrendPanel({ refreshToken }: Props) {
         <div className="absolute inset-0 glass-grain" />
         <div className="relative flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h3 className="text-lg font-semibold text-ink">Risk trend</h3>
-            <p className="mt-1 text-sm leading-6 text-slate-700">
+            <h3 className="text-xl font-semibold text-ink">Risk trend</h3>
+            <p className="mt-2 text-[15px] leading-7 text-slate-700">
               Save snapshots to build a week-by-week burnout risk history.
             </p>
           </div>
@@ -64,13 +64,13 @@ export const TrendPanel = memo(function TrendPanel({ refreshToken }: Props) {
         </div>
       </div>
 
-      <div className="px-6 py-5">
+      <div className="px-7 py-6">
         {data.length < 2 ? (
-          <div className="rounded-2xl border border-white/55 bg-white/20 px-4 py-3 text-sm text-slate-700 backdrop-blur-xl">
+          <div className="rounded-2xl border border-white/55 bg-white/20 px-5 py-4 text-[15px] leading-7 text-slate-700 backdrop-blur-xl">
             Save at least two weeks to see a trend line.
           </div>
         ) : (
-          <div className="h-[240px] w-full">
+          <div className="h-[clamp(250px,34vh,360px)] w-full">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={data} margin={{ top: 8, right: 16, left: -12, bottom: 8 }}>
                 <CartesianGrid stroke="rgba(18, 38, 58, 0.14)" strokeDasharray="3 3" vertical={false} />

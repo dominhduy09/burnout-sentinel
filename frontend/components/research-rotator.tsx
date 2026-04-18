@@ -43,34 +43,47 @@ export default function ResearchRotator() {
 
   const slide = SLIDES[index];
 
+  function showNextSlide() {
+    setIndex((current) => (current + 1) % SLIDES.length);
+  }
+
   return (
-    <div className="card flex min-h-[220px] flex-col justify-between p-0 shadow-card">
-      <div className="panel-header">
+    <div className="relative flex h-[250px] flex-col overflow-hidden rounded-[30px] border border-white/60 bg-white/28 shadow-[0_20px_45px_rgba(15,23,42,0.10)] backdrop-blur-xl sm:h-[258px] lg:h-[250px]">
+      <button
+        type="button"
+        onClick={showNextSlide}
+        className="panel-header border-white/40 bg-[linear-gradient(135deg,_rgba(255,255,255,0.74)_0%,_rgba(246,252,249,0.48)_48%,_rgba(255,246,236,0.36)_100%)] px-6 py-4 text-left transition hover:bg-[linear-gradient(135deg,_rgba(255,255,255,0.84)_0%,_rgba(246,252,249,0.58)_48%,_rgba(255,246,236,0.44)_100%)] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+      >
         <div className="absolute inset-0 glass-grain" />
-        <div className="relative flex items-center justify-between gap-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Research Signal</p>
-          <div className="flex gap-1.5">
-            {SLIDES.map((item, itemIndex) => (
-              <span
-                key={item.title}
-                className={`h-1.5 w-6 rounded-full ${itemIndex === index ? "bg-coral" : "bg-white/40"}`}
-              />
-            ))}
+        <div className="relative flex items-start justify-between gap-3">
+          <div className="space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-accent">Research Signal</p>
+            <span className="glass-pill glass-pill-mint px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
+              {slide.tag}
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="flex gap-1.5">
+              {SLIDES.map((item, itemIndex) => (
+                <span
+                  key={item.title}
+                  className={`h-1.5 w-6 rounded-full ${itemIndex === index ? "bg-coral" : "bg-white/40"}`}
+                />
+              ))}
+            </div>
+            <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Click</span>
           </div>
         </div>
-      </div>
+      </button>
 
-      <div className="px-6 py-6">
-        <div className="space-y-3">
-          <span className="glass-pill glass-pill-mint px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
-            {slide.tag}
-          </span>
+      <div className="flex min-h-0 flex-1 items-center px-6 py-4">
+        <div className="min-h-0 space-y-4 overflow-hidden">
           <h2 className="text-lg font-semibold leading-8 text-ink">{slide.title}</h2>
           <p className="text-sm leading-7 text-slate-700">{slide.body}</p>
         </div>
       </div>
 
-      <div className="border-t border-white/50 px-6 py-4 text-[11px] uppercase tracking-[0.18em] text-slate-600">
+      <div className="border-t border-white/50 bg-white/30 px-6 py-4 text-[11px] uppercase tracking-[0.18em] text-slate-600">
         <div className="flex items-center justify-between gap-2">
           <span>Source: {slide.source}</span>
           <Link href="/research-signal" className="text-ink underline decoration-emerald-300/80 underline-offset-2">
