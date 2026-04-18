@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const SLIDES = [
@@ -43,7 +44,7 @@ export default function ResearchRotator() {
   const slide = SLIDES[index];
 
   return (
-    <div className="card flex min-h-[190px] flex-col justify-between p-0 shadow-card">
+    <div className="card flex min-h-[220px] flex-col justify-between p-0 shadow-card">
       <div className="panel-header">
         <div className="absolute inset-0 glass-grain" />
         <div className="relative flex items-center justify-between gap-3">
@@ -59,18 +60,23 @@ export default function ResearchRotator() {
         </div>
       </div>
 
-      <div className="px-5 py-4">
-        <div className="space-y-2">
+      <div className="px-6 py-6">
+        <div className="space-y-3">
           <span className="glass-pill glass-pill-mint px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em]">
             {slide.tag}
           </span>
-          <h2 className="text-lg font-semibold leading-7 text-ink">{slide.title}</h2>
-          <p className="text-sm leading-6 text-slate-700">{slide.body}</p>
+          <h2 className="text-lg font-semibold leading-8 text-ink">{slide.title}</h2>
+          <p className="text-sm leading-7 text-slate-700">{slide.body}</p>
         </div>
       </div>
 
-      <div className="border-t border-white/50 px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-slate-600">
-        Source: {slide.source}
+      <div className="border-t border-white/50 px-6 py-4 text-[11px] uppercase tracking-[0.18em] text-slate-600">
+        <div className="flex items-center justify-between gap-2">
+          <span>Source: {slide.source}</span>
+          <Link href="/research-signal" className="text-ink underline decoration-emerald-300/80 underline-offset-2">
+            Daily feed
+          </Link>
+        </div>
       </div>
     </div>
   );

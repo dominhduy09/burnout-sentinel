@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import { type FieldPath, type UseFormReturn, useForm } from "react-hook-form";
 
 import { MetricChart } from "@/components/metric-chart";
@@ -153,6 +153,17 @@ const presets: Array<{
   }
 ];
 
+type PanelKey = "risk" | "whatif" | "metric" | "trend";
+
+const defaultPanelOrder: PanelKey[] = ["risk", "whatif", "metric", "trend"];
+
+const panelLabelByKey: Record<PanelKey, string> = {
+  risk: "Risk Summary",
+  whatif: "What-if Simulator",
+  metric: "Workload Snapshot",
+  trend: "Risk Trend"
+};
+
 function formatValue(value: number, step: number) {
   return step < 1 ? value.toFixed(1) : String(Math.round(value));
 }
@@ -161,6 +172,24 @@ function clampPercent(value: number, max: number) {
   if (!Number.isFinite(value) || !Number.isFinite(max) || max <= 0) return 0;
   return Math.max(0, Math.min(100, (value / max) * 100));
 }
+
+const statStyleByStatus = {
+  healthy: {
+    dot: "bg-emerald-400",
+    label: "text-emerald-800",
+    bar: "from-emerald-500/80 to-emerald-300/30"
+  },
+  watch: {
+    dot: "bg-amber-400",
+    label: "text-amber-800",
+    bar: "from-amber-500/80 to-amber-300/30"
+  },
+  risk: {
+    dot: "bg-rose-400",
+    label: "text-rose-800",
+    bar: "from-rose-500/80 to-rose-300/30"
+  }
+} as const;
 
 function MetricControl({
   form,
@@ -240,6 +269,8 @@ export function PlannerForm() {
   const [celebrateToken, setCelebrateToken] = useState(0);
   const [moderateToken, setModerateToken] = useState(0);
   const [highToken, setHighToken] = useState(0);
+  const [panelOrder, setPanelOrder] = useState<PanelKey[]>(defaultPanelOrder);
+  const [draggedPanel, setDraggedPanel] = useState<PanelKey | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioPrimedRef = useRef(false);
 
@@ -250,19 +281,20 @@ export function PlannerForm() {
 
   const isSubmitting = form.formState.isSubmitting;
   const values = form.watch();
+  const deferredValues = useDeferredValue(values);
 
   const localResult = useMemo(
-    () => analyzePlannerInput(values),
+    () => analyzePlannerInput(deferredValues),
     [
-      values.week_name,
-      values.task_count,
-      values.high_priority_task_count,
-      values.estimated_task_hours,
-      values.exam_count,
-      values.clinical_hours,
-      values.average_sleep_hours,
-      values.stress_level,
-      values.free_hours
+      deferredValues.week_name,
+      deferredValues.task_count,
+      deferredValues.high_priority_task_count,
+      deferredValues.estimated_task_hours,
+      deferredValues.exam_count,
+      deferredValues.clinical_hours,
+      deferredValues.average_sleep_hours,
+      deferredValues.stress_level,
+      deferredValues.free_hours
     ]
   );
 
@@ -270,57 +302,119 @@ export function PlannerForm() {
     if (!backendResult || !backendInput) return localResult;
     const same =
       backendInput.week_name === values.week_name &&
-      backendInput.task_count === values.task_count &&
-      backendInput.high_priority_task_count === values.high_priority_task_count &&
-      backendInput.estimated_task_hours === values.estimated_task_hours &&
-      backendInput.exam_count === values.exam_count &&
-      backendInput.clinical_hours === values.clinical_hours &&
-      backendInput.average_sleep_hours === values.average_sleep_hours &&
-      backendInput.stress_level === values.stress_level &&
-      backendInput.free_hours === values.free_hours;
+      backendInput.task_count === deferredValues.task_count &&
+      backendInput.high_priority_task_count === deferredValues.high_priority_task_count &&
+      backendInput.estimated_task_hours === deferredValues.estimated_task_hours &&
+      backendInput.exam_count === deferredValues.exam_count &&
+      backendInput.clinical_hours === deferredValues.clinical_hours &&
+      backendInput.average_sleep_hours === deferredValues.average_sleep_hours &&
+      backendInput.stress_level === deferredValues.stress_level &&
+      backendInput.free_hours === deferredValues.free_hours;
     return same ? backendResult : localResult;
-  }, [backendResult, backendInput, localResult, values]);
+  }, [backendResult, backendInput, deferredValues, localResult, values.week_name]);
 
   const fallbackInsights = useMemo<Insight[]>(
     () => [
       {
         label: "Task Load",
-        value: values.task_count,
-        status: values.task_count > 22 ? "risk" : values.task_count > 16 ? "watch" : "healthy"
+        value: deferredValues.task_count,
+        status: deferredValues.task_count > 22 ? "risk" : deferredValues.task_count > 16 ? "watch" : "healthy"
       },
       {
         label: "Priority Tasks",
-        value: values.high_priority_task_count,
+        value: deferredValues.high_priority_task_count,
         status:
-          values.high_priority_task_count > 5
+          deferredValues.high_priority_task_count > 5
             ? "risk"
-            : values.high_priority_task_count > 3
+            : deferredValues.high_priority_task_count > 3
               ? "watch"
               : "healthy"
       },
       {
         label: "Work Hours",
-        value: Number(values.estimated_task_hours) + Number(values.clinical_hours),
+        value: Number(deferredValues.estimated_task_hours) + Number(deferredValues.clinical_hours),
         status:
-          Number(values.estimated_task_hours) + Number(values.clinical_hours) > 40
+          Number(deferredValues.estimated_task_hours) + Number(deferredValues.clinical_hours) > 40
             ? "risk"
-            : Number(values.estimated_task_hours) + Number(values.clinical_hours) > 28
+            : Number(deferredValues.estimated_task_hours) + Number(deferredValues.clinical_hours) > 28
               ? "watch"
               : "healthy"
       },
       {
         label: "Sleep",
-        value: values.average_sleep_hours,
-        status: values.average_sleep_hours < 6.5 ? "risk" : values.average_sleep_hours < 7.5 ? "watch" : "healthy"
+        value: deferredValues.average_sleep_hours,
+        status:
+          deferredValues.average_sleep_hours < 6.5
+            ? "risk"
+            : deferredValues.average_sleep_hours < 7.5
+              ? "watch"
+              : "healthy"
       },
       {
         label: "Free Time",
-        value: values.free_hours,
-        status: values.free_hours < 10 ? "risk" : values.free_hours < 16 ? "watch" : "healthy"
+        value: deferredValues.free_hours,
+        status: deferredValues.free_hours < 10 ? "risk" : deferredValues.free_hours < 16 ? "watch" : "healthy"
       }
     ],
-    [values]
+    [deferredValues]
   );
+
+  const handleApplyWhatIf = useCallback(
+    (nextValues: PlannerFormValues) => {
+      form.reset(nextValues);
+      setBackendResult(null);
+      setBackendInput(null);
+      setError(null);
+    },
+    [form]
+  );
+
+  const reorderPanels = useCallback((source: PanelKey, target: PanelKey) => {
+    if (source === target) return;
+
+    setPanelOrder((current) => {
+      const sourceIndex = current.indexOf(source);
+      const targetIndex = current.indexOf(target);
+
+      if (sourceIndex === -1 || targetIndex === -1) {
+        return current;
+      }
+
+      const next = [...current];
+      next.splice(sourceIndex, 1);
+      next.splice(targetIndex, 0, source);
+      return next;
+    });
+  }, []);
+
+  function renderPanel(panelKey: PanelKey) {
+    if (panelKey === "risk") {
+      return (
+        <RiskPanel
+          result={displayResult}
+          celebrateToken={celebrateToken}
+          moderateToken={moderateToken}
+          highToken={highToken}
+        />
+      );
+    }
+
+    if (panelKey === "whatif") {
+      return (
+        <WhatIfPanel
+          values={deferredValues}
+          baselineScore={displayResult.risk_score}
+          onApply={handleApplyWhatIf}
+        />
+      );
+    }
+
+    if (panelKey === "metric") {
+      return <MetricChart insights={displayResult.insights ?? fallbackInsights} />;
+    }
+
+    return <TrendPanel refreshToken={historyToken} />;
+  }
 
   async function onSubmit(formValues: PlannerFormValues) {
     setError(null);
@@ -494,28 +588,10 @@ export function PlannerForm() {
     values.high_priority_task_count > 5 ? "risk" : values.high_priority_task_count > 3 ? "watch" : "healthy";
   const bufferStatus = values.free_hours < 10 ? "risk" : values.free_hours < 16 ? "watch" : "healthy";
 
-  const statStyleByStatus = {
-    healthy: {
-      dot: "bg-emerald-400",
-      label: "text-emerald-800",
-      bar: "from-emerald-500/80 to-emerald-300/30"
-    },
-    watch: {
-      dot: "bg-amber-400",
-      label: "text-amber-800",
-      bar: "from-amber-500/80 to-amber-300/30"
-    },
-    risk: {
-      dot: "bg-rose-400",
-      label: "text-rose-800",
-      bar: "from-rose-500/80 to-rose-300/30"
-    }
-  } as const;
-
   return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(360px,460px)_minmax(0,1fr)] xl:items-start">
-      <div className="xl:sticky xl:top-6">
-        <div className="card max-h-[calc(100vh-8.5rem)] overflow-hidden p-0 xl:flex xl:flex-col">
+    <div className="grid gap-6 xl:grid-cols-[minmax(0,0.92fr)_minmax(0,1.08fr)] xl:items-start">
+      <div className="min-w-0">
+        <div className="card overflow-hidden p-0">
           <div className="panel-header">
             <div className="absolute inset-0 glass-grain" />
             <div className="relative flex items-start justify-between gap-4">
@@ -533,8 +609,8 @@ export function PlannerForm() {
             </div>
           </div>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 px-5 py-5 xl:flex-1 xl:overflow-y-auto">
-            <div className="surface-soft p-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-6 py-6">
+            <div className="surface-soft p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Preset Week</p>
@@ -576,7 +652,7 @@ export function PlannerForm() {
               </div>
             </div>
 
-            <div className="surface-soft p-4">
+            <div className="surface-soft p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Workload</p>
@@ -596,7 +672,7 @@ export function PlannerForm() {
               </div>
             </div>
 
-            <div className="surface-mint p-4">
+            <div className="surface-mint p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Recovery</p>
@@ -616,8 +692,8 @@ export function PlannerForm() {
               </div>
             </div>
 
-            <div className="surface-shell p-3">
-              <div className="grid gap-3 sm:grid-cols-3">
+            <div className="surface-shell p-4">
+              <div className="grid gap-4 sm:grid-cols-3">
                 <div className="glass-stat">
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
@@ -729,25 +805,43 @@ export function PlannerForm() {
         </div>
       </div>
 
-      <div className="space-y-6 xl:max-h-[calc(100vh-8.5rem)] xl:overflow-y-auto xl:pr-1">
-        <RiskPanel
-          result={displayResult}
-          celebrateToken={celebrateToken}
-          moderateToken={moderateToken}
-          highToken={highToken}
-        />
-        <WhatIfPanel
-          values={values}
-          baselineScore={displayResult.risk_score}
-          onApply={(nextValues) => {
-            form.reset(nextValues);
-            setBackendResult(null);
-            setBackendInput(null);
-            setError(null);
-          }}
-        />
-        <MetricChart insights={displayResult.insights ?? fallbackInsights} />
-        <TrendPanel refreshToken={historyToken} />
+      <div className="min-w-0 grid gap-4 xl:grid-cols-2 xl:pr-0">
+        {panelOrder.map((panelKey) => {
+          const spanClass = panelKey === "risk" || panelKey === "whatif" ? "xl:col-span-2" : "xl:col-span-1";
+
+          return (
+            <div
+              key={panelKey}
+              draggable
+              onDragStart={(event) => {
+                setDraggedPanel(panelKey);
+                event.dataTransfer.effectAllowed = "move";
+              }}
+              onDragOver={(event) => {
+                event.preventDefault();
+                event.dataTransfer.dropEffect = "move";
+              }}
+              onDrop={(event) => {
+                event.preventDefault();
+                if (!draggedPanel) return;
+                reorderPanels(draggedPanel, panelKey);
+                setDraggedPanel(null);
+              }}
+              onDragEnd={() => {
+                setDraggedPanel(null);
+              }}
+              className={`min-w-0 ${spanClass} ${draggedPanel === panelKey ? "opacity-70" : ""}`}
+            >
+              <div className="mb-2 flex items-center justify-between px-1">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-600">
+                  {panelLabelByKey[panelKey]}
+                </p>
+                <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Drag to move</span>
+              </div>
+              {renderPanel(panelKey)}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

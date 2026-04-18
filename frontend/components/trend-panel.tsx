@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState } from "react";
 import {
   CartesianGrid,
   Line,
@@ -23,7 +23,7 @@ function formatShortDate(value: string) {
   return date.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
-export function TrendPanel({ refreshToken }: Props) {
+export const TrendPanel = memo(function TrendPanel({ refreshToken }: Props) {
   const [snapshots, setSnapshots] = useState<RiskSnapshot[]>([]);
 
   useEffect(() => {
@@ -110,5 +110,5 @@ export function TrendPanel({ refreshToken }: Props) {
       </div>
     </div>
   );
-}
+});
 

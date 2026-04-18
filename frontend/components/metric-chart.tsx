@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { Insight } from "@/lib/types";
 
 const DOTS: Record<Insight["status"], string> = {
@@ -105,7 +106,7 @@ function buildGradient(spec: MetricSpec) {
   return `linear-gradient(90deg, ${rose} 0%, ${rose} ${warningStop}%, ${amber} ${warningStop}%, ${amber} ${healthyStop}%, ${green} ${healthyStop}%, ${green} 100%)`;
 }
 
-export function MetricChart({ insights }: Props) {
+export const MetricChart = memo(function MetricChart({ insights }: Props) {
   return (
     <div className="card overflow-hidden p-0 shadow-card">
       <div className="panel-header">
@@ -182,4 +183,4 @@ export function MetricChart({ insights }: Props) {
       </div>
     </div>
   );
-}
+});

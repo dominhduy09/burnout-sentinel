@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import type { PlannerFormValues } from "@/lib/types";
 import { buildWhatIfSuggestions } from "@/lib/whatif";
 
@@ -9,7 +10,7 @@ type Props = {
   onApply: (nextValues: PlannerFormValues) => void;
 };
 
-export function WhatIfPanel({ values, baselineScore, onApply }: Props) {
+export const WhatIfPanel = memo(function WhatIfPanel({ values, baselineScore, onApply }: Props) {
   const suggestions = buildWhatIfSuggestions(values);
 
   return (
@@ -77,5 +78,5 @@ export function WhatIfPanel({ values, baselineScore, onApply }: Props) {
       </div>
     </div>
   );
-}
+});
 

@@ -4,23 +4,23 @@ import ResearchRotator from "@/components/research-rotator";
 
 export default function HomePage() {
   return (
-    <main className="relative min-h-screen overflow-hidden text-slate-900 transition-colors">
+    <main className="relative min-h-screen overflow-x-hidden text-slate-900 transition-colors">
       <AmbientBackground />
 
       <section className="relative border-b border-white/50 backdrop-blur-xl">
-        <div className="relative mx-auto grid max-w-7xl gap-5 px-6 py-5 lg:grid-cols-[minmax(0,1.55fr)_minmax(280px,360px)] lg:px-8 lg:py-6">
-          <div className="max-w-3xl">
+        <div className="relative mx-auto grid max-w-7xl gap-8 px-6 py-10 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,0.9fr)] lg:px-8 lg:py-12">
+          <div className="min-w-0 max-w-3xl space-y-6">
             <p className="eyebrow">UAB Student Wellness Concept</p>
-            <h1 className="mt-3 text-3xl font-semibold tracking-tight text-ink sm:text-4xl">
+            <h1 className="text-balance text-3xl font-semibold tracking-tight text-ink sm:text-4xl lg:text-[3.2rem] lg:leading-[1.06]">
               A planner that catches burnout before the week gets out of control.
             </h1>
-            <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-700 sm:text-base">
+            <p className="reading-copy max-w-2xl text-sm sm:text-base">
               Built for students dealing with packed schedules, overlapping deadlines, work, labs, clinicals,
               and personal responsibilities. The planner translates one busy week into a clearer picture of
               overload, recovery, and what to change first.
             </p>
 
-            <div className="mt-4 flex flex-wrap gap-2 text-xs sm:text-sm">
+            <div className="flex flex-wrap gap-2 text-xs sm:text-sm">
               <span className="chip">Weekly workload analysis</span>
               <span className="chip">Burnout risk scoring</span>
               <span className="chip">Personalized planning advice</span>
@@ -31,11 +31,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-6 py-4 lg:px-8 lg:py-4">
+      <section className="mx-auto max-w-7xl px-6 py-8 lg:px-8 lg:py-10">
         <PlannerForm />
       </section>
 
-      <footer className="relative mx-auto flex max-w-7xl flex-col gap-2 px-6 pb-10 pt-2 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
+      <footer className="relative mx-auto flex max-w-7xl flex-col gap-3 px-6 pb-12 pt-4 text-xs text-slate-600 sm:flex-row sm:items-center sm:justify-between lg:px-8">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="text-slate-600">Credits:</span>
           <a
