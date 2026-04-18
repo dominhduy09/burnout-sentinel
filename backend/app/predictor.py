@@ -130,35 +130,30 @@ class BurnoutPredictor:
                 value=payload.task_count,
                 healthy_max=16,
                 warning_max=22,
-                unit="tasks",
             ),
             self._build_insight(
                 label="Priority Tasks",
                 value=payload.high_priority_task_count,
                 healthy_max=3,
                 warning_max=5,
-                unit="tasks",
             ),
             self._build_insight(
                 label="Work Hours",
                 value=payload.academic_load_hours,
                 healthy_max=28,
                 warning_max=40,
-                unit="hours",
             ),
             self._build_inverse_insight(
                 label="Sleep",
                 value=payload.average_sleep_hours,
                 healthy_min=7.5,
                 warning_min=6.5,
-                unit="hours/night",
             ),
             self._build_inverse_insight(
                 label="Free Time",
                 value=payload.free_hours,
                 healthy_min=16,
                 warning_min=10,
-                unit="hours/week",
             ),
         ]
 
@@ -301,7 +296,6 @@ class BurnoutPredictor:
         value: float,
         healthy_max: float,
         warning_max: float,
-        unit: str,
     ) -> Insight:
         if value <= healthy_max:
             status = "healthy"
@@ -323,7 +317,6 @@ class BurnoutPredictor:
         value: float,
         healthy_min: float,
         warning_min: float,
-        unit: str,
     ) -> Insight:
         if value >= healthy_min:
             status = "healthy"

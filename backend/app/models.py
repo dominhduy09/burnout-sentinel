@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, computed_field
+from pydantic import BaseModel, Field, computed_field, field_validator, model_validator
 
 
 RiskLabel = Literal["Low", "Moderate", "High"]
@@ -20,6 +20,20 @@ class PlannerInput(BaseModel):
     average_sleep_hours: float = Field(ge=0, le=12)
     stress_level: int = Field(ge=1, le=10)
     free_hours: float = Field(ge=0, le=80)
+
+    @field_validator("week_name")
+    @classmethod
+    def validate_week_name(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("week_name cannot be blank.")
+        return normalized
+
+    @model_validator(mode="after")
+    def validate_task_relationships(self) -> "PlannerInput":
+        if self.high_priority_task_count > self.task_count:
+            raise ValueError("high_priority_task_count cannot be greater than task_count.")
+        return self
 
     @computed_field
     @property
