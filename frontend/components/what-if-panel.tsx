@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { PlannerFormValues } from "@/lib/types";
 import { buildWhatIfSuggestions } from "@/lib/whatif";
 
@@ -12,22 +12,38 @@ type Props = {
 
 export const WhatIfPanel = memo(function WhatIfPanel({ values, baselineScore, onApply }: Props) {
   const suggestions = buildWhatIfSuggestions(values);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <div className="card overflow-hidden p-0 shadow-card">
       <div className="panel-header">
         <div className="absolute inset-0 glass-grain" />
-        <div className="relative">
-          <h3 className="text-xl font-semibold text-ink">What-if simulator</h3>
-          <p className="mt-2 text-[15px] leading-7 text-slate-700">
-            Try a change and see the risk score update instantly. These are the highest-impact moves for this
-            week.
-          </p>
+        <div className="relative flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-xl font-semibold text-ink">What-if simulator</h3>
+            <p className="mt-2 text-[15px] leading-7 text-slate-700">
+              Try a change and see the risk score update instantly. These are the highest-impact moves for this
+              week.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setCollapsed((value) => !value)}
+            className="glass-button shrink-0 rounded-full px-3 py-2 text-xs font-semibold text-ink hover:border-emerald-200/70"
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? "Expand" : "Minimize"}
+          </button>
         </div>
       </div>
 
       <div className="space-y-4 px-7 py-6">
-        {suggestions.length ? (
+        {collapsed ? (
+          <div className="rounded-2xl border border-emerald-200/60 bg-emerald-50/35 px-4 py-3 text-sm text-emerald-900 backdrop-blur-xl">
+            Preview hidden. Expand to compare suggested changes and risk shifts.
+          </div>
+        ) : suggestions.length ? (
           suggestions.map((suggestion) => (
             <div key={suggestion.title} className="glass-stat px-5 py-4">
               <div className="flex flex-wrap items-start justify-between gap-4">

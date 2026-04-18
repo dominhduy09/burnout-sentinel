@@ -4,7 +4,7 @@
 
 Burnout Sentinel is a student wellness project focused on helping students manage heavy weekly workloads before stress becomes burnout.
 
-The idea is to build a smart planner that does more than track assignments. It estimates overload risk, highlights unhealthy weeks, and suggests better planning choices using machine learning and optionally an LLM for personalized guidance.
+The idea is to build a smart planner that does more than track assignments. It estimates overload risk, highlights unhealthy weeks, and suggests better planning choices using explainable scoring, research signals, and optional AI-assisted guidance later.
 
 ## Project Status
 
@@ -13,6 +13,7 @@ The idea is to build a smart planner that does more than track assignments. It e
 - Version: `0.3.0`
 - Last updated: `April 18, 2026`
 - Scope: `MVP prototype`
+- Current focus: `Frontend experience, research feed, and explainable burnout analysis`
 
 ## Project Goal
 
@@ -29,6 +30,16 @@ Nursing students often juggle classes, labs, clinical shifts, exams, assignments
 - `ml/`: future home for training scripts and saved models
 - `shared/`: future home for shared schemas and constants
 
+## What The App Does Now
+
+- lets students enter weekly workload and recovery inputs
+- shows a live burnout risk summary while planning
+- provides drag-and-drop dashboard panels with minimize/expand controls
+- displays a workload snapshot, what-if simulator, and trend chart
+- plays visual and audio feedback for presets and risk states
+- includes a daily Research Signal page with valid external links and infinite scrolling
+- offers footer links for reading research, sending feedback, and donating
+
 ## Core Idea
 
 The planner will let students:
@@ -37,6 +48,8 @@ The planner will let students:
 - view a workload dashboard
 - receive a burnout risk score
 - get suggestions for balancing their schedule
+
+The current implementation also emphasizes a more readable, glass-style interface with compact action buttons and research-focused context.
 
 ## Proposed Tech Direction
 
@@ -95,15 +108,23 @@ The app will run at `http://localhost:3000`.
 
 The current codebase includes:
 
-- a landing page and planner form for a student schedule
+- a landing page with a research rotator and footer action links
+- a planner form for a student schedule
 - a FastAPI endpoint at `/api/v1/analyze`
 - an explainable risk-scoring engine
 - recommendation generation based on workload, sleep, exams, and stress
 - a frontend dashboard with a risk panel, metric snapshot, what-if simulator, and trend chart
 - drag-and-drop panel reordering with drop-zone hints
+- collapsible dashboard cards for the risk details, what-if simulator, workload snapshot, and trend chart
 - state-specific audio and visual feedback for risk outcomes and preset actions
 - a daily Research Signal feed page with valid source links
 - infinite scroll loading for Research Signal content
+
+## Notes For Contributors
+
+- The frontend is the main active area for UI and interaction changes right now.
+- The Research Signal feed uses paged API loading and link fallbacks so external sources stay usable.
+- Footer feedback currently opens an email draft to `dominhduy09@gmail.com`.
 
 ## Recommended Build Order From Here
 

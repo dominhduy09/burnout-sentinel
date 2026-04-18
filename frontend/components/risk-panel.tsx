@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { AnalysisResponse } from "@/lib/types";
 
 type Props = {
@@ -176,6 +177,8 @@ function ScoreBreakdown({ result }: { result: AnalysisResponse }) {
 }
 
 export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: Props) {
+  const [detailsCollapsed, setDetailsCollapsed] = useState(false);
+
   if (!result) {
     return (
       <div className="card p-0 shadow-card">
@@ -256,29 +259,53 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
       </div>
 
       <div className="surface-shell p-1">
-        <div className="grid gap-1 p-1 lg:grid-cols-2">
-          <ScoreBreakdown result={result} />
+        <div className="mb-2 flex items-start justify-between gap-3 px-2 pt-2">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-600">Details</p>
+            <p className="mt-1 text-sm text-slate-700">
+              Score breakdown and next steps can be minimized when you want a simpler view.
+            </p>
+          </div>
 
-          <div className="card">
-            <h3 className="text-lg font-semibold text-ink">Recommended next steps</h3>
-            <div className="mt-4 space-y-2">
-              {result.recommendations.map((recommendation) => (
-                <div
-                  key={recommendation.title}
-                  className={`relative overflow-hidden rounded-2xl border px-4 py-3 backdrop-blur-xl ${priorityStyles[recommendation.priority]}`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="font-semibold">{recommendation.title}</p>
-                    <span className="glass-pill px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-stone-700">
-                      {recommendation.priority}
-                    </span>
+          <button
+            type="button"
+            onClick={() => setDetailsCollapsed((value) => !value)}
+            className="glass-button rounded-full px-3 py-2 text-xs font-semibold text-ink hover:border-emerald-200/70"
+            aria-expanded={!detailsCollapsed}
+          >
+            {detailsCollapsed ? "Expand" : "Minimize"}
+          </button>
+        </div>
+
+        {detailsCollapsed ? (
+          <div className="rounded-[20px] border border-white/55 bg-white/20 px-4 py-4 text-sm text-slate-700 backdrop-blur-xl">
+            Details minimized. Expand to view the score breakdown and recommended next steps.
+          </div>
+        ) : (
+          <div className="grid gap-1 p-1 lg:grid-cols-2">
+            <ScoreBreakdown result={result} />
+
+            <div className="card">
+              <h3 className="text-lg font-semibold text-ink">Recommended next steps</h3>
+              <div className="mt-4 space-y-2">
+                {result.recommendations.map((recommendation) => (
+                  <div
+                    key={recommendation.title}
+                    className={`relative overflow-hidden rounded-2xl border px-4 py-3 backdrop-blur-xl ${priorityStyles[recommendation.priority]}`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <p className="font-semibold">{recommendation.title}</p>
+                      <span className="glass-pill px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-stone-700">
+                        {recommendation.priority}
+                      </span>
+                    </div>
+                    <p className="mt-2 text-sm leading-7">{recommendation.detail}</p>
                   </div>
-                  <p className="mt-2 text-sm leading-7">{recommendation.detail}</p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

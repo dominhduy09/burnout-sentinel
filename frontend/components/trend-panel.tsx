@@ -25,6 +25,7 @@ function formatShortDate(value: string) {
 
 export const TrendPanel = memo(function TrendPanel({ refreshToken }: Props) {
   const [snapshots, setSnapshots] = useState<RiskSnapshot[]>([]);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     setSnapshots(loadSnapshots());
@@ -45,27 +46,41 @@ export const TrendPanel = memo(function TrendPanel({ refreshToken }: Props) {
       <div className="panel-header">
         <div className="absolute inset-0 glass-grain" />
         <div className="relative flex flex-wrap items-start justify-between gap-3">
-          <div>
+          <div className="min-w-0">
             <h3 className="text-xl font-semibold text-ink">Risk trend</h3>
             <p className="mt-2 text-[15px] leading-7 text-slate-700">
               Save snapshots to build a week-by-week burnout risk history.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              clearSnapshots();
-              setSnapshots([]);
-            }}
-            className="glass-button rounded-full px-3 py-2 text-sm font-semibold text-ink hover:border-rose-200/70"
-          >
-            Clear
-          </button>
+          <div className="flex flex-wrap items-center justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setCollapsed((value) => !value)}
+              className="glass-button rounded-full px-3 py-2 text-xs font-semibold text-ink hover:border-emerald-200/70"
+              aria-expanded={!collapsed}
+            >
+              {collapsed ? "Expand" : "Minimize"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                clearSnapshots();
+                setSnapshots([]);
+              }}
+              className="glass-button rounded-full px-3 py-2 text-sm font-semibold text-ink hover:border-rose-200/70"
+            >
+              Clear
+            </button>
+          </div>
         </div>
       </div>
 
       <div className="px-7 py-6">
-        {data.length < 2 ? (
+        {collapsed ? (
+          <div className="rounded-2xl border border-white/55 bg-white/20 px-5 py-4 text-[15px] leading-7 text-slate-700 backdrop-blur-xl">
+            Trend minimized. Expand to review the risk history chart.
+          </div>
+        ) : data.length < 2 ? (
           <div className="rounded-2xl border border-white/55 bg-white/20 px-5 py-4 text-[15px] leading-7 text-slate-700 backdrop-blur-xl">
             Save at least two weeks to see a trend line.
           </div>

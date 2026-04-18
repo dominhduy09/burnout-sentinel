@@ -728,8 +728,8 @@ export function PlannerForm() {
             </div>
           </div>
 
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 px-6 py-6">
-            <div className="surface-soft p-5">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5 px-5 py-5 sm:px-6 sm:py-6">
+            <div className="surface-soft p-4 sm:p-5">
               <div className="flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Preset Week</p>
@@ -776,7 +776,7 @@ export function PlannerForm() {
               </div>
             </div>
 
-            <div className="surface-soft p-5">
+            <div className="surface-soft p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Workload</p>
@@ -788,7 +788,7 @@ export function PlannerForm() {
               </div>
 
               <div className="surface-shell">
-                <div className="grid gap-2">
+                <div className="grid gap-3 md:grid-cols-2">
                   {workloadFields.map((field) => (
                     <MetricControl key={field.name} form={form} field={field} />
                   ))}
@@ -796,7 +796,7 @@ export function PlannerForm() {
               </div>
             </div>
 
-            <div className="surface-mint p-5">
+            <div className="surface-mint p-4 sm:p-5">
               <div className="mb-4 flex items-center justify-between gap-3">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Recovery</p>
@@ -808,7 +808,7 @@ export function PlannerForm() {
               </div>
 
               <div className="surface-shell border-emerald-100/70">
-                <div className="grid gap-2">
+                <div className="grid gap-3 md:grid-cols-2">
                   {recoveryFields.map((field) => (
                     <MetricControl key={field.name} form={form} field={field} />
                   ))}
@@ -889,34 +889,36 @@ export function PlannerForm() {
               </div>
             ) : null}
 
-            <button
-              type="button"
-              onClick={() => {
-                addSnapshot(values, displayResult);
-                setHistoryToken((value) => value + 1);
-                setSaveMessage("Snapshot saved to your trend history.");
-                window.setTimeout(() => setSaveMessage(null), 2200);
-              }}
-              className="glass-button inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold text-ink hover:border-emerald-200/70 active:translate-y-px"
-            >
-              Save week snapshot
-            </button>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <button
+                type="button"
+                onClick={() => {
+                  addSnapshot(values, displayResult);
+                  setHistoryToken((value) => value + 1);
+                  setSaveMessage("Snapshot saved to your trend history.");
+                  window.setTimeout(() => setSaveMessage(null), 2200);
+                }}
+                className="glass-button inline-flex w-full items-center justify-center gap-2 rounded-full border border-emerald-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.86)_0%,_rgba(236,253,245,0.72)_100%)] px-4 py-2 text-xs font-semibold text-emerald-900 shadow-[0_12px_28px_rgba(16,185,129,0.14)] transition hover:border-emerald-300/70 hover:shadow-[0_14px_34px_rgba(16,185,129,0.18)] active:translate-y-px"
+              >
+                Save week snapshot
+              </button>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              onPointerDown={primeCelebrationSound}
-              className="glass-button glass-button-ink inline-flex w-full items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-70 xl:sticky xl:bottom-0 active:translate-y-px"
-            >
-              {isSubmitting ? (
-                <>
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
-                  <span>Analyzing...</span>
-                </>
-              ) : (
-                "Analyze Burnout Risk"
-              )}
-            </button>
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                onPointerDown={primeCelebrationSound}
+                className="glass-button glass-button-ink inline-flex w-full items-center justify-center gap-2 rounded-full bg-[linear-gradient(135deg,_rgba(16,185,129,0.96)_0%,_rgba(8,145,178,0.92)_100%)] px-4 py-2 text-xs font-semibold text-white shadow-[0_14px_34px_rgba(8,145,178,0.24)] ring-1 ring-white/20 transition hover:shadow-[0_16px_38px_rgba(8,145,178,0.28)] disabled:cursor-not-allowed disabled:opacity-70 active:translate-y-px"
+              >
+                {isSubmitting ? (
+                  <>
+                    <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/40 border-t-white" />
+                    <span>Analyzing...</span>
+                  </>
+                ) : (
+                  "Analyze Burnout Risk"
+                )}
+              </button>
+            </div>
           </form>
         </div>
       </div>
@@ -938,24 +940,90 @@ export function PlannerForm() {
                 event.dataTransfer.effectAllowed = "move";
 
                 const dragPreview = document.createElement("div");
-                dragPreview.textContent = panelLabelByKey[panelKey];
-                dragPreview.style.padding = "8px 12px";
-                dragPreview.style.borderRadius = "12px";
-                dragPreview.style.fontSize = "11px";
-                dragPreview.style.fontWeight = "700";
-                dragPreview.style.letterSpacing = "0.12em";
-                dragPreview.style.textTransform = "uppercase";
-                dragPreview.style.background = "rgba(255, 255, 255, 0.92)";
-                dragPreview.style.border = "1px solid rgba(16, 185, 129, 0.45)";
-                dragPreview.style.boxShadow = "0 12px 30px rgba(15, 23, 42, 0.16)";
-                dragPreview.style.color = "#065f46";
+                dragPreview.style.position = "fixed";
+                dragPreview.style.left = "-1000px";
+                dragPreview.style.top = "-1000px";
+                dragPreview.style.width = "168px";
+                dragPreview.style.padding = "10px";
+                dragPreview.style.borderRadius = "16px";
+                dragPreview.style.border = "1px solid rgba(16, 185, 129, 0.35)";
+                dragPreview.style.background = "linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(236,253,245,0.92) 100%)";
+                dragPreview.style.boxShadow = "0 18px 40px rgba(15, 23, 42, 0.22)";
+                dragPreview.style.backdropFilter = "blur(18px)";
+                dragPreview.style.color = "#0f172a";
+                dragPreview.style.pointerEvents = "none";
+                dragPreview.style.transform = "rotate(-2deg)";
+                dragPreview.style.display = "flex";
+                dragPreview.style.flexDirection = "column";
+                dragPreview.style.gap = "8px";
+
+                const topRow = document.createElement("div");
+                topRow.style.display = "flex";
+                topRow.style.alignItems = "center";
+                topRow.style.justifyContent = "space-between";
+                topRow.style.gap = "8px";
+
+                const titleWrap = document.createElement("div");
+                titleWrap.style.display = "flex";
+                titleWrap.style.flexDirection = "column";
+                titleWrap.style.gap = "4px";
+
+                const title = document.createElement("div");
+                title.textContent = panelLabelByKey[panelKey];
+                title.style.fontSize = "10px";
+                title.style.fontWeight = "700";
+                title.style.letterSpacing = "0.12em";
+                title.style.textTransform = "uppercase";
+                title.style.color = "#065f46";
+
+                const subtitle = document.createElement("div");
+                subtitle.textContent = "Holding";
+                subtitle.style.fontSize = "11px";
+                subtitle.style.fontWeight = "700";
+                subtitle.style.color = "#0f172a";
+
+                const badge = document.createElement("div");
+                badge.textContent = "MOVE";
+                badge.style.padding = "4px 8px";
+                badge.style.borderRadius = "9999px";
+                badge.style.fontSize = "9px";
+                badge.style.fontWeight = "700";
+                badge.style.letterSpacing = "0.16em";
+                badge.style.background = "rgba(16, 185, 129, 0.12)";
+                badge.style.color = "#047857";
+
+                titleWrap.appendChild(title);
+                titleWrap.appendChild(subtitle);
+                topRow.appendChild(titleWrap);
+                topRow.appendChild(badge);
+
+                const sampleBar = document.createElement("div");
+                sampleBar.style.display = "grid";
+                sampleBar.style.gap = "6px";
+
+                const lineOne = document.createElement("div");
+                lineOne.style.height = "8px";
+                lineOne.style.borderRadius = "9999px";
+                lineOne.style.background = "linear-gradient(90deg, rgba(16,185,129,0.55), rgba(245,158,11,0.45))";
+
+                const lineTwo = document.createElement("div");
+                lineTwo.style.height = "8px";
+                lineTwo.style.width = "78%";
+                lineTwo.style.borderRadius = "9999px";
+                lineTwo.style.background = "rgba(15, 23, 42, 0.12)";
+
+                sampleBar.appendChild(lineOne);
+                sampleBar.appendChild(lineTwo);
+
+                dragPreview.appendChild(topRow);
+                dragPreview.appendChild(sampleBar);
                 document.body.appendChild(dragPreview);
-                event.dataTransfer.setDragImage(dragPreview, 12, 12);
+                event.dataTransfer.setDragImage(dragPreview, 28, 24);
                 window.setTimeout(() => {
                   if (document.body.contains(dragPreview)) {
                     document.body.removeChild(dragPreview);
                   }
-                }, 0);
+                }, 40);
               }}
               onDragOver={(event) => {
                 event.preventDefault();
@@ -981,7 +1049,9 @@ export function PlannerForm() {
                 setDragOverPanel(null);
               }}
               className={`min-w-0 rounded-[24px] transition-all duration-200 ${spanClass} ${
-                draggedPanel === panelKey ? "opacity-70" : ""
+                draggedPanel === panelKey
+                  ? "cursor-grabbing scale-[0.985] -translate-y-1 ring-2 ring-emerald-300/80 bg-white/65 shadow-[0_24px_60px_rgba(15,23,42,0.16)]"
+                  : "cursor-grab"
               } ${isDropTarget ? "ring-2 ring-emerald-300/80 bg-emerald-50/30" : ""} ${
                 canDropHere ? "ring-1 ring-dashed ring-emerald-200/70" : ""
               }`}
@@ -991,7 +1061,13 @@ export function PlannerForm() {
                   {panelLabelByKey[panelKey]}
                 </p>
                 <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
-                  {isDropTarget ? "Release to drop" : canDropHere ? "Drop available" : "Drag to move"}
+                  {draggedPanel === panelKey
+                    ? "Holding"
+                    : isDropTarget
+                      ? "Release to drop"
+                      : canDropHere
+                        ? "Drop available"
+                        : "Drag to move"}
                 </span>
               </div>
               {isDropTarget ? (

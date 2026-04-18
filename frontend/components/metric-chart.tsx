@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState } from "react";
 import type { Insight } from "@/lib/types";
 
 const DOTS: Record<Insight["status"], string> = {
@@ -107,33 +107,51 @@ function buildGradient(spec: MetricSpec) {
 }
 
 export const MetricChart = memo(function MetricChart({ insights }: Props) {
+  const [collapsed, setCollapsed] = useState(false);
+
   return (
     <div className="card overflow-hidden p-0 shadow-card">
       <div className="panel-header">
         <div className="absolute inset-0 glass-grain" />
-        <div className="relative">
-          <h3 className="text-xl font-semibold text-ink">Workload Snapshot</h3>
-          <p className="mt-2 text-[15px] leading-7 text-slate-700">
-            These gauges show which metrics are in the healthy zone, watch zone, or risk zone.
-          </p>
+        <div className="relative flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h3 className="text-xl font-semibold text-ink">Workload Snapshot</h3>
+            <p className="mt-2 text-[15px] leading-7 text-slate-700">
+              These gauges show which metrics are in the healthy zone, watch zone, or risk zone.
+            </p>
 
-          <div className="mt-5 flex flex-wrap gap-2.5">
-            {insights.map((insight) => (
-              <div
-                key={insight.label}
-                className="glass-pill gap-2 px-3 py-1.5 text-xs font-semibold text-slate-800"
-              >
-                <span className={`h-2 w-2 rounded-full ${DOTS[insight.status]}`} />
-                <span className="text-slate-700">{insight.label}</span>
-                <span className="tabular-nums text-ink">{insight.value}</span>
-              </div>
-            ))}
+            <div className="mt-5 flex flex-wrap gap-2.5">
+              {insights.map((insight) => (
+                <div
+                  key={insight.label}
+                  className="glass-pill gap-2 px-3 py-1.5 text-xs font-semibold text-slate-800"
+                >
+                  <span className={`h-2 w-2 rounded-full ${DOTS[insight.status]}`} />
+                  <span className="text-slate-700">{insight.label}</span>
+                  <span className="tabular-nums text-ink">{insight.value}</span>
+                </div>
+              ))}
+            </div>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setCollapsed((value) => !value)}
+            className="glass-button shrink-0 rounded-full px-3 py-2 text-xs font-semibold text-ink hover:border-emerald-200/70"
+            aria-expanded={!collapsed}
+          >
+            {collapsed ? "Expand" : "Minimize"}
+          </button>
         </div>
       </div>
 
       <div className="space-y-4 px-7 py-6">
-        {insights.map((insight) => {
+        {collapsed ? (
+          <div className="rounded-2xl border border-white/55 bg-white/20 px-4 py-3 text-sm text-slate-700 backdrop-blur-xl">
+            Snapshot minimized. Expand to inspect each gauge and target range.
+          </div>
+        ) : (
+          insights.map((insight) => {
           const spec = METRIC_SPECS[insight.label];
           if (!spec) {
             return (
@@ -179,7 +197,8 @@ export const MetricChart = memo(function MetricChart({ insights }: Props) {
               </div>
             </div>
           );
-        })}
+          })
+        )}
       </div>
     </div>
   );

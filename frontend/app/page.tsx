@@ -60,23 +60,21 @@ export default function HomePage() {
               </div>
             </div>
 
-            <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-1">
+            <div className="flex flex-wrap gap-2.5">
               <Link
                 href="/research-signal"
-                className="glass-button inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-semibold text-ink hover:border-emerald-200/70"
+                className="glass-button inline-flex min-w-[8.5rem] flex-1 items-center justify-center rounded-full border border-emerald-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(236,253,245,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-emerald-900 shadow-[0_10px_22px_rgba(16,185,129,0.12)] transition hover:border-emerald-300/70 hover:shadow-[0_12px_26px_rgba(16,185,129,0.16)]"
               >
                 Read research
               </Link>
               <a
-                className="glass-button inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-semibold text-ink hover:border-amber-200/70"
-                href="https://github.com/dominhduy09/burnout-sentinel/issues/new/choose"
-                target="_blank"
-                rel="noreferrer"
+                className="glass-button inline-flex min-w-[8.5rem] flex-1 items-center justify-center rounded-full border border-amber-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(255,247,237,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-amber-900 shadow-[0_10px_22px_rgba(245,158,11,0.12)] transition hover:border-amber-300/70 hover:shadow-[0_12px_26px_rgba(245,158,11,0.16)]"
+                href="mailto:dominhduy09@gmail.com?subject=Burnout%20Sentinel%20Feedback"
               >
                 Send feedback
               </a>
               <a
-                className="glass-button inline-flex items-center justify-center rounded-full px-3 py-2 text-sm font-semibold text-ink hover:border-emerald-200/70"
+                className="glass-button inline-flex min-w-[8.5rem] flex-1 items-center justify-center rounded-full border border-sky-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(239,246,255,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-sky-900 shadow-[0_10px_22px_rgba(59,130,246,0.12)] transition hover:border-sky-300/70 hover:shadow-[0_12px_26px_rgba(59,130,246,0.16)]"
                 href="https://github.com/sponsors/dominhduy09"
                 target="_blank"
                 rel="noreferrer"
