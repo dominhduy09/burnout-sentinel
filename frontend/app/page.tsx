@@ -2,6 +2,7 @@ import { PlannerForm } from "@/components/planner-form";
 import { AmbientBackground } from "@/components/ambient-background";
 import ResearchRotator from "@/components/research-rotator";
 import WelcomeOverlay from "@/components/welcome-overlay";
+import SessionButton from "@/components/session-button";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -42,7 +43,7 @@ export default function HomePage() {
 
       <footer className="relative mx-auto w-full max-w-[94rem] px-5 pb-12 pt-4 sm:px-6 lg:px-10 2xl:px-12">
         <div className="surface-shell p-5 sm:p-6">
-          <div className="grid gap-5 lg:grid-cols-[1.2fr_0.8fr]">
+          <div>
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-stone-600">Information</p>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-700">
@@ -61,41 +62,41 @@ export default function HomePage() {
                 </a>
               </div>
             </div>
+          </div>
 
-            <div className="flex flex-wrap gap-2.5">
+          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-white/50 pt-3 text-xs text-slate-600">
+            <span>Thanks for supporting student wellbeing projects.</span>
+            <div className="flex flex-wrap items-center gap-2.5">
+              <SessionButton />
               <Link
                 href="/research-signal"
-                className="glass-button inline-flex min-w-[8.5rem] flex-1 items-center justify-center rounded-full border border-emerald-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(236,253,245,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-emerald-900 shadow-[0_10px_22px_rgba(16,185,129,0.12)] transition hover:border-emerald-300/70 hover:shadow-[0_12px_26px_rgba(16,185,129,0.16)]"
+                className="glass-button inline-flex min-w-[8.5rem] items-center justify-center rounded-full border border-emerald-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(236,253,245,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-emerald-900 shadow-[0_10px_22px_rgba(16,185,129,0.12)] transition hover:border-emerald-300/70 hover:shadow-[0_12px_26px_rgba(16,185,129,0.16)]"
               >
                 Read research
               </Link>
               <a
-                className="glass-button inline-flex min-w-[8.5rem] flex-1 items-center justify-center rounded-full border border-amber-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(255,247,237,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-amber-900 shadow-[0_10px_22px_rgba(245,158,11,0.12)] transition hover:border-amber-300/70 hover:shadow-[0_12px_26px_rgba(245,158,11,0.16)]"
+                className="glass-button inline-flex min-w-[8.5rem] items-center justify-center rounded-full border border-amber-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(255,247,237,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-amber-900 shadow-[0_10px_22px_rgba(245,158,11,0.12)] transition hover:border-amber-300/70 hover:shadow-[0_12px_26px_rgba(245,158,11,0.16)]"
                 href="mailto:dominhduy09@gmail.com?subject=Burnout%20Sentinel%20Feedback"
               >
                 Send feedback
               </a>
               <a
-                className="glass-button inline-flex min-w-[8.5rem] flex-1 items-center justify-center rounded-full border border-sky-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(239,246,255,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-sky-900 shadow-[0_10px_22px_rgba(59,130,246,0.12)] transition hover:border-sky-300/70 hover:shadow-[0_12px_26px_rgba(59,130,246,0.16)]"
+                className="glass-button inline-flex min-w-[8.5rem] items-center justify-center rounded-full border border-sky-200/60 bg-[linear-gradient(135deg,_rgba(255,255,255,0.88)_0%,_rgba(239,246,255,0.72)_100%)] px-3.5 py-2 text-xs font-semibold text-sky-900 shadow-[0_10px_22px_rgba(59,130,246,0.12)] transition hover:border-sky-300/70 hover:shadow-[0_12px_26px_rgba(59,130,246,0.16)]"
                 href="https://github.com/sponsors/dominhduy09"
                 target="_blank"
                 rel="noreferrer"
               >
                 Donate
               </a>
+              <a
+                className="glass-pill w-fit text-ink transition hover:bg-white/65 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+                href="https://github.com/dominhduy09/burnout-sentinel"
+                target="_blank"
+                rel="noreferrer"
+              >
+                GitHub project
+              </a>
             </div>
-          </div>
-
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-white/50 pt-3 text-xs text-slate-600">
-            <span>Thanks for supporting student wellbeing projects.</span>
-            <a
-              className="glass-pill w-fit text-ink transition hover:bg-white/65 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
-              href="https://github.com/dominhduy09/burnout-sentinel"
-              target="_blank"
-              rel="noreferrer"
-            >
-              GitHub project
-            </a>
           </div>
         </div>
       </footer>
