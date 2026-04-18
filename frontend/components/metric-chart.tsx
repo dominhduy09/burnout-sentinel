@@ -140,7 +140,7 @@ export const MetricChart = memo(function MetricChart({ insights }: Props) {
             className="glass-button shrink-0 rounded-full px-3 py-2 text-xs font-semibold text-ink hover:border-emerald-200/70"
             aria-expanded={!collapsed}
           >
-            {collapsed ? "Expand" : "Minimize"}
+            {collapsed ? "Expand" : "Collapse"}
           </button>
         </div>
       </div>

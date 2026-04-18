@@ -273,7 +273,7 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
             className="glass-button rounded-full px-3 py-2 text-xs font-semibold text-ink hover:border-emerald-200/70"
             aria-expanded={!detailsCollapsed}
           >
-            {detailsCollapsed ? "Expand" : "Minimize"}
+            {detailsCollapsed ? "Expand" : "Collapse"}
           </button>
         </div>
 

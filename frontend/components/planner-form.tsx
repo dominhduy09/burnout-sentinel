@@ -274,6 +274,10 @@ export function PlannerForm() {
   const [panelOrder, setPanelOrder] = useState<PanelKey[]>(defaultPanelOrder);
   const [draggedPanel, setDraggedPanel] = useState<PanelKey | null>(null);
   const [dragOverPanel, setDragOverPanel] = useState<PanelKey | null>(null);
+  const [inputSections, setInputSections] = useState({
+    workload: false,
+    recovery: false
+  });
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioPrimedRef = useRef(false);
 
@@ -388,6 +392,13 @@ export function PlannerForm() {
       next.splice(targetIndex, 0, source);
       return next;
     });
+  }, []);
+
+  const toggleInputSection = useCallback((section: "workload" | "recovery") => {
+    setInputSections((current) => ({
+      ...current,
+      [section]: !current[section]
+    }));
   }, []);
 
   function renderPanel(panelKey: PanelKey) {
@@ -735,7 +746,10 @@ export function PlannerForm() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Preset Week</p>
                   <p className="mt-1 text-sm text-stone-600">Start from a realistic workload pattern.</p>
                 </div>
-                <div className="flex flex-wrap justify-end gap-2">
+              </div>
+
+              <div id="planner-preset-section" className="mt-4 space-y-4">
+                <div className="flex flex-wrap justify-start gap-2">
                   {presets.map((preset) => (
                     <button
                       key={preset.label}
@@ -757,9 +771,7 @@ export function PlannerForm() {
                     </button>
                   ))}
                 </div>
-              </div>
 
-              <div className="mt-4">
                 <label className="block">
                   <span className="text-sm font-medium text-ink">Week Name</span>
                   <input
@@ -782,18 +794,29 @@ export function PlannerForm() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-stone-500">Workload</p>
                   <p className="mt-1 text-sm text-stone-600">Academic and task pressure across the week.</p>
                 </div>
-                <div className="glass-pill glass-pill-amber">
-                  {values.task_count} tasks
+                <div className="flex items-center gap-2">
+                  <div className="glass-pill glass-pill-amber">{values.task_count} tasks</div>
+                  <button
+                    type="button"
+                    onClick={() => toggleInputSection("workload")}
+                    aria-expanded={inputSections.workload}
+                    aria-controls="planner-workload-section"
+                    className="glass-pill px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:border-amber-200/70"
+                  >
+                    {inputSections.workload ? "Collapse" : "Expand"}
+                  </button>
                 </div>
               </div>
 
-              <div className="surface-shell">
-                <div className="grid gap-3 md:grid-cols-2">
-                  {workloadFields.map((field) => (
-                    <MetricControl key={field.name} form={form} field={field} />
-                  ))}
+              {inputSections.workload ? (
+                <div id="planner-workload-section" className="surface-shell">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {workloadFields.map((field) => (
+                      <MetricControl key={field.name} form={form} field={field} />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
 
             <div className="surface-mint p-4 sm:p-5">
@@ -802,18 +825,29 @@ export function PlannerForm() {
                   <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-700">Recovery</p>
                   <p className="mt-1 text-sm text-stone-600">Sleep, stress, and the amount of room left to breathe.</p>
                 </div>
-                <div className="glass-pill glass-pill-mint">
-                  {values.free_hours} buffer
+                <div className="flex items-center gap-2">
+                  <div className="glass-pill glass-pill-mint">{values.free_hours} buffer</div>
+                  <button
+                    type="button"
+                    onClick={() => toggleInputSection("recovery")}
+                    aria-expanded={inputSections.recovery}
+                    aria-controls="planner-recovery-section"
+                    className="glass-pill px-3 py-1.5 text-xs font-semibold text-stone-700 transition hover:border-emerald-200/70"
+                  >
+                    {inputSections.recovery ? "Collapse" : "Expand"}
+                  </button>
                 </div>
               </div>
 
-              <div className="surface-shell border-emerald-100/70">
-                <div className="grid gap-3 md:grid-cols-2">
-                  {recoveryFields.map((field) => (
-                    <MetricControl key={field.name} form={form} field={field} />
-                  ))}
+              {inputSections.recovery ? (
+                <div id="planner-recovery-section" className="surface-shell border-emerald-100/70">
+                  <div className="grid gap-3 md:grid-cols-2">
+                    {recoveryFields.map((field) => (
+                      <MetricControl key={field.name} form={form} field={field} />
+                    ))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
 
             <div className="surface-shell rounded-[28px] border border-white/65 bg-[linear-gradient(135deg,_rgba(255,255,255,0.72)_0%,_rgba(249,247,242,0.38)_56%,_rgba(242,249,246,0.24)_100%)] p-5 shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-6">
