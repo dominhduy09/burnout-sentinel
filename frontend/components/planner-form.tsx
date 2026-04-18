@@ -1204,6 +1204,29 @@ export function PlannerForm() {
                   <p className="text-xs text-slate-600">Risk label thresholds: Low &lt; 40, Moderate 40-69, High &gt;= 70.</p>
                 </div>
               </div>
+
+              <div className="rounded-2xl border border-white/60 bg-white/35 p-4 lg:col-span-2">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Why this formula is useful</p>
+                <div className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                  <p>
+                    It combines two evidence-backed perspectives: job/academic demand pressure and recovery capacity.
+                    This helps avoid one-sided scoring that only counts workload.
+                  </p>
+                  <p>
+                    The model stays explainable because each input contributes through visible terms (demand, recovery,
+                    stress) before controlled multipliers are applied.
+                  </p>
+                  <p>
+                    Nonlinear sleep and buffer deficits reflect that risk usually accelerates when sleep and recovery
+                    fall below healthy ranges, instead of increasing at a perfectly linear rate.
+                  </p>
+                  <p>
+                    Thresholded labels (Low/Moderate/High) make weekly decisions practical for students while still
+                    preserving a continuous 0-100 score for tracking trends.
+                  </p>
+                </div>
+              </div>
+
             </div>
           </div>
         </div>
