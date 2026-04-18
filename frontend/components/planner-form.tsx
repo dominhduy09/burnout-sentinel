@@ -264,6 +264,8 @@ export function PlannerForm() {
   const [backendInput, setBackendInput] = useState<PlannerFormValues | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [saveMessage, setSaveMessage] = useState<string | null>(null);
+  const [hasAnalyzed, setHasAnalyzed] = useState(false);
+  const [activePresetEffect, setActivePresetEffect] = useState<string | null>(null);
   const [historyToken, setHistoryToken] = useState(0);
   const [analysisToken, setAnalysisToken] = useState(0);
   const [celebrateToken, setCelebrateToken] = useState(0);
@@ -271,6 +273,7 @@ export function PlannerForm() {
   const [highToken, setHighToken] = useState(0);
   const [panelOrder, setPanelOrder] = useState<PanelKey[]>(defaultPanelOrder);
   const [draggedPanel, setDraggedPanel] = useState<PanelKey | null>(null);
+  const [dragOverPanel, setDragOverPanel] = useState<PanelKey | null>(null);
   const audioContextRef = useRef<AudioContext | null>(null);
   const audioPrimedRef = useRef(false);
 
@@ -388,6 +391,47 @@ export function PlannerForm() {
   }, []);
 
   function renderPanel(panelKey: PanelKey) {
+    if (!hasAnalyzed) {
+      if (panelKey === "risk") {
+        return <RiskPanel result={null} />;
+      }
+
+      const lockedCopy: Record<Exclude<PanelKey, "risk">, { title: string; body: string }> = {
+        whatif: {
+          title: "What-if simulator",
+          body: "This panel unlocks after you analyze the week, so the suggestions match the schedule you submitted."
+        },
+        metric: {
+          title: "Workload Snapshot",
+          body: "The metric gauges stay hidden until analysis runs, then they show the current risk signals."
+        },
+        trend: {
+          title: "Risk trend",
+          body: "Trend history appears after analysis so the chart only reflects saved results, not draft inputs."
+        }
+      };
+
+      const copy = lockedCopy[panelKey];
+
+      return (
+        <div className="card overflow-hidden p-0 shadow-card">
+          <div className="panel-header">
+            <div className="absolute inset-0 glass-grain" />
+            <div className="relative">
+              <h3 className="text-xl font-semibold text-ink">{copy.title}</h3>
+              <p className="mt-2 text-[15px] leading-7 text-slate-700">{copy.body}</p>
+            </div>
+          </div>
+
+          <div className="px-7 py-6">
+            <div className="rounded-2xl border border-dashed border-emerald-200/70 bg-emerald-50/30 px-4 py-4 text-sm leading-6 text-emerald-900 backdrop-blur-xl">
+              Click Analyze Burnout Risk to reveal the full result set for this panel.
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     if (panelKey === "risk") {
       return (
         <RiskPanel
@@ -435,6 +479,7 @@ export function PlannerForm() {
       const payload: AnalysisResponse = await response.json();
       setBackendInput(formValues);
       setBackendResult(payload);
+      setHasAnalyzed(true);
       setAnalysisToken((value) => value + 1);
     } catch (submitError) {
       const message =
@@ -462,7 +507,7 @@ export function PlannerForm() {
     }
   }
 
-  function playLowSound() {
+  function playBalancedSound() {
     if (!audioPrimedRef.current) return;
     const context = audioContextRef.current;
     if (!context) return;
@@ -471,30 +516,30 @@ export function PlannerForm() {
       const now = context.currentTime;
       const master = context.createGain();
       master.gain.setValueAtTime(0.0001, now);
-      master.gain.exponentialRampToValueAtTime(0.18, now + 0.02);
-      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.45);
+      master.gain.exponentialRampToValueAtTime(0.16, now + 0.02);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.25);
       master.connect(context.destination);
 
-      const notes = [523.25, 659.25, 783.99, 1046.5]; // C5 E5 G5 C6
+      const notes = [523.25, 659.25, 783.99]; // C5 E5 G5
       notes.forEach((frequency, index) => {
         const osc = context.createOscillator();
         const gain = context.createGain();
         osc.type = "sine";
-        osc.frequency.setValueAtTime(frequency, now + index * 0.07);
-        gain.gain.setValueAtTime(0.0001, now + index * 0.07);
-        gain.gain.exponentialRampToValueAtTime(0.12, now + index * 0.07 + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.07 + 0.48);
+        osc.frequency.setValueAtTime(frequency, now + index * 0.1);
+        gain.gain.setValueAtTime(0.0001, now + index * 0.1);
+        gain.gain.exponentialRampToValueAtTime(0.12, now + index * 0.1 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.1 + 0.42);
         osc.connect(gain);
         gain.connect(master);
-        osc.start(now + index * 0.07);
-        osc.stop(now + index * 0.07 + 0.5);
+        osc.start(now + index * 0.1);
+        osc.stop(now + index * 0.1 + 0.44);
       });
     } catch {
       // ignore: sound is optional
     }
   }
 
-  function playModerateSound() {
+  function playHeavySound() {
     if (!audioPrimedRef.current) return;
     const context = audioContextRef.current;
     if (!context) return;
@@ -503,30 +548,30 @@ export function PlannerForm() {
       const now = context.currentTime;
       const master = context.createGain();
       master.gain.setValueAtTime(0.0001, now);
-      master.gain.exponentialRampToValueAtTime(0.14, now + 0.02);
-      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.8);
+      master.gain.exponentialRampToValueAtTime(0.15, now + 0.02);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 1.1);
       master.connect(context.destination);
 
-      const notes = [659.25, 587.33, 523.25]; // E5 D5 C5
+      const notes = [392.0, 349.23, 392.0, 329.63]; // G4 F4 G4 E4
       notes.forEach((frequency, index) => {
         const osc = context.createOscillator();
         const gain = context.createGain();
-        osc.type = "triangle";
-        osc.frequency.setValueAtTime(frequency, now + index * 0.09);
-        gain.gain.setValueAtTime(0.0001, now + index * 0.09);
-        gain.gain.exponentialRampToValueAtTime(0.09, now + index * 0.09 + 0.01);
-        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.09 + 0.28);
+        osc.type = index % 2 === 0 ? "triangle" : "sine";
+        osc.frequency.setValueAtTime(frequency, now + index * 0.16);
+        gain.gain.setValueAtTime(0.0001, now + index * 0.16);
+        gain.gain.exponentialRampToValueAtTime(0.1, now + index * 0.16 + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.16 + 0.34);
         osc.connect(gain);
         gain.connect(master);
-        osc.start(now + index * 0.09);
-        osc.stop(now + index * 0.09 + 0.3);
+        osc.start(now + index * 0.16);
+        osc.stop(now + index * 0.16 + 0.36);
       });
     } catch {
       // ignore: sound is optional
     }
   }
 
-  function playHighSound() {
+  function playOverloadedSound() {
     if (!audioPrimedRef.current) return;
     const context = audioContextRef.current;
     if (!context) return;
@@ -535,23 +580,24 @@ export function PlannerForm() {
       const now = context.currentTime;
       const master = context.createGain();
       master.gain.setValueAtTime(0.0001, now);
-      master.gain.exponentialRampToValueAtTime(0.16, now + 0.015);
-      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.85);
+      master.gain.exponentialRampToValueAtTime(0.18, now + 0.01);
+      master.gain.exponentialRampToValueAtTime(0.0001, now + 0.95);
       master.connect(context.destination);
 
       const pattern = [
-        { frequency: 392.0, start: 0.0, duration: 0.16 },
-        { frequency: 392.0, start: 0.23, duration: 0.16 },
-        { frequency: 311.13, start: 0.46, duration: 0.22 } // Eb4
+        { frequency: 466.16, start: 0.0, duration: 0.12 },
+        { frequency: 523.25, start: 0.16, duration: 0.12 },
+        { frequency: 415.3, start: 0.32, duration: 0.18 },
+        { frequency: 311.13, start: 0.52, duration: 0.22 } // Eb4
       ];
 
       pattern.forEach((tone) => {
         const osc = context.createOscillator();
         const gain = context.createGain();
-        osc.type = "square";
+        osc.type = tone.frequency >= 500 ? "square" : "sawtooth";
         osc.frequency.setValueAtTime(tone.frequency, now + tone.start);
         gain.gain.setValueAtTime(0.0001, now + tone.start);
-        gain.gain.exponentialRampToValueAtTime(0.1, now + tone.start + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.12, now + tone.start + 0.01);
         gain.gain.exponentialRampToValueAtTime(0.0001, now + tone.start + tone.duration);
         osc.connect(gain);
         gain.connect(master);
@@ -563,23 +609,44 @@ export function PlannerForm() {
     }
   }
 
+  function triggerPresetFeedback(presetLabel: string) {
+    primeCelebrationSound();
+    setActivePresetEffect(presetLabel);
+    window.setTimeout(() => setActivePresetEffect((current) => (current === presetLabel ? null : current)), 650);
+
+    if (presetLabel === "Balanced") {
+      setCelebrateToken((value) => value + 1);
+      playBalancedSound();
+      return;
+    }
+
+    if (presetLabel === "Heavy") {
+      setModerateToken((value) => value + 1);
+      playHeavySound();
+      return;
+    }
+
+    setHighToken((value) => value + 1);
+    playOverloadedSound();
+  }
+
   useEffect(() => {
     if (!displayResult || analysisToken === 0) return;
 
     if (displayResult.risk_label === "Low") {
       setCelebrateToken((value) => value + 1);
-      playLowSound();
+      playBalancedSound();
       return;
     }
 
     if (displayResult.risk_label === "Moderate") {
       setModerateToken((value) => value + 1);
-      playModerateSound();
+      playHeavySound();
       return;
     }
 
     setHighToken((value) => value + 1);
-    playHighSound();
+    playOverloadedSound();
   }, [analysisToken]);
 
   const totalLoad = Number(values.estimated_task_hours) + Number(values.clinical_hours);
@@ -588,7 +655,7 @@ export function PlannerForm() {
     values.high_priority_task_count > 5 ? "risk" : values.high_priority_task_count > 3 ? "watch" : "healthy";
   const bufferStatus = values.free_hours < 10 ? "risk" : values.free_hours < 16 ? "watch" : "healthy";
 
-  const liveTotalTitle = totalLoadStatus === "risk" ? "Overloaded" : totalLoadStatus === "watch" ? "Heavy week" : "Balanced";
+  const liveTotalTitle = totalLoadStatus === "risk" ? "Overloaded" : totalLoadStatus === "watch" ? "Heavy" : "Balanced";
   const liveTotalHint =
     totalLoadStatus === "risk"
       ? "Consider reducing study or clinical load this week."
@@ -653,12 +720,17 @@ export function PlannerForm() {
                       key={preset.label}
                       type="button"
                       onClick={() => {
+                        triggerPresetFeedback(preset.label);
                         form.reset(preset.values);
                         setBackendResult(null);
                         setBackendInput(null);
                         setError(null);
                       }}
-                      className="glass-button rounded-full px-3 py-2 text-sm font-semibold text-ink hover:border-emerald-200/70"
+                      className={`glass-button rounded-full px-3 py-2 text-sm font-semibold text-ink transition-all hover:border-emerald-200/70 ${
+                        activePresetEffect === preset.label
+                          ? "scale-[1.04] border-emerald-300/80 bg-emerald-50/70 shadow-[0_10px_30px_rgba(16,185,129,0.2)]"
+                          : ""
+                      }`}
                     >
                       {preset.label}
                     </button>
@@ -826,6 +898,9 @@ export function PlannerForm() {
       <div className="min-w-0 grid gap-5 lg:grid-cols-2 xl:pr-0">
         {panelOrder.map((panelKey) => {
           const spanClass = panelKey === "risk" || panelKey === "whatif" ? "xl:col-span-2" : "xl:col-span-1";
+          const isDraggingAny = Boolean(draggedPanel);
+          const isDropTarget = dragOverPanel === panelKey && draggedPanel !== panelKey;
+          const canDropHere = isDraggingAny && draggedPanel !== panelKey;
 
           return (
             <div
@@ -833,29 +908,71 @@ export function PlannerForm() {
               draggable
               onDragStart={(event) => {
                 setDraggedPanel(panelKey);
+                setDragOverPanel(null);
                 event.dataTransfer.effectAllowed = "move";
+
+                const dragPreview = document.createElement("div");
+                dragPreview.textContent = panelLabelByKey[panelKey];
+                dragPreview.style.padding = "8px 12px";
+                dragPreview.style.borderRadius = "12px";
+                dragPreview.style.fontSize = "11px";
+                dragPreview.style.fontWeight = "700";
+                dragPreview.style.letterSpacing = "0.12em";
+                dragPreview.style.textTransform = "uppercase";
+                dragPreview.style.background = "rgba(255, 255, 255, 0.92)";
+                dragPreview.style.border = "1px solid rgba(16, 185, 129, 0.45)";
+                dragPreview.style.boxShadow = "0 12px 30px rgba(15, 23, 42, 0.16)";
+                dragPreview.style.color = "#065f46";
+                document.body.appendChild(dragPreview);
+                event.dataTransfer.setDragImage(dragPreview, 12, 12);
+                window.setTimeout(() => {
+                  if (document.body.contains(dragPreview)) {
+                    document.body.removeChild(dragPreview);
+                  }
+                }, 0);
               }}
               onDragOver={(event) => {
                 event.preventDefault();
                 event.dataTransfer.dropEffect = "move";
+                if (draggedPanel && draggedPanel !== panelKey && dragOverPanel !== panelKey) {
+                  setDragOverPanel(panelKey);
+                }
+              }}
+              onDragLeave={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                  setDragOverPanel((current) => (current === panelKey ? null : current));
+                }
               }}
               onDrop={(event) => {
                 event.preventDefault();
                 if (!draggedPanel) return;
                 reorderPanels(draggedPanel, panelKey);
                 setDraggedPanel(null);
+                setDragOverPanel(null);
               }}
               onDragEnd={() => {
                 setDraggedPanel(null);
+                setDragOverPanel(null);
               }}
-              className={`min-w-0 ${spanClass} ${draggedPanel === panelKey ? "opacity-70" : ""}`}
+              className={`min-w-0 rounded-[24px] transition-all duration-200 ${spanClass} ${
+                draggedPanel === panelKey ? "opacity-70" : ""
+              } ${isDropTarget ? "ring-2 ring-emerald-300/80 bg-emerald-50/30" : ""} ${
+                canDropHere ? "ring-1 ring-dashed ring-emerald-200/70" : ""
+              }`}
             >
               <div className="mb-3 flex items-center justify-between px-1">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-600">
                   {panelLabelByKey[panelKey]}
                 </p>
-                <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Drag to move</span>
+                <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">
+                  {isDropTarget ? "Release to drop" : canDropHere ? "Drop available" : "Drag to move"}
+                </span>
               </div>
+              {isDropTarget ? (
+                <div className="mb-3 rounded-xl border border-emerald-300/80 bg-emerald-50/60 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-900">
+                  Drop panel here
+                </div>
+              ) : null}
               {renderPanel(panelKey)}
             </div>
           );

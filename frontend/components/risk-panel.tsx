@@ -15,17 +15,23 @@ const riskStyles = {
 
 const riskCopy = {
   Low: {
-    headline: "Balanced week",
+    headline: "Balanced",
     body: "Your workload and recovery look reasonably aligned. Protect sleep and buffer time as deadlines change."
   },
   Moderate: {
-    headline: "Starting to compress",
-    body: "This week is trending heavy. Small changes (reduce compression, protect sleep, add buffer time) can prevent a slide into overload."
+    headline: "Heavy",
+    body: "This week is trending heavy. Small changes like reducing compression, protecting sleep, and adding buffer time can keep it manageable."
   },
   High: {
-    headline: "Overload risk",
+    headline: "Overloaded",
     body: "This week is likely to feel crowded and reactive. The best first move is to reduce compression and add recovery time before performance suffers."
   }
+} as const;
+
+const riskShellClass = {
+  Low: "analysis-result-shell--balanced",
+  Moderate: "analysis-result-shell--heavy",
+  High: "analysis-result-shell--overloaded"
 } as const;
 
 const priorityStyles = {
@@ -64,7 +70,7 @@ function ReactionBurst({ variant }: { variant: "low" | "moderate" | "high" }) {
 function MethodDetails() {
   return (
     <details className="mt-5 rounded-2xl border border-white/55 bg-white/20 px-4 py-3 text-sm text-slate-700 backdrop-blur-xl">
-      <summary className="cursor-pointer select-none text-xs font-semibold uppercase tracking-[0.22em] text-stone-700">
+      <summary className="inline-flex cursor-pointer list-none items-center gap-2 rounded-full border border-emerald-200/70 bg-emerald-50/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-900 shadow-sm transition hover:border-emerald-300 hover:bg-emerald-100/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300/60 [&::-webkit-details-marker]:hidden">
         How the risk level works
       </summary>
       <div className="mt-3 space-y-3 leading-6">
@@ -179,8 +185,8 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
             <p className="text-xs font-semibold uppercase tracking-[0.28em] text-stone-600">Weekly Analysis</p>
             <h3 className="mt-3 text-xl font-semibold text-ink">See where the week starts to slip</h3>
             <p className="mt-3 text-sm leading-6 text-slate-700">
-              Enter a realistic student schedule to surface overload risk, the factors driving it, and the
-              first changes worth making.
+                Click Analyze Burnout Risk to surface the score, the factors driving it, and the first changes worth
+                making.
             </p>
           </div>
         </div>
@@ -211,8 +217,8 @@ export function RiskPanel({ result, celebrateToken, moderateToken, highToken }: 
 
   return (
     <div className="space-y-4">
-      <div className="card-flat p-0">
-        <div className="panel-header-flat">
+      <div className={`card-flat p-0 analysis-result-shell ${riskShellClass[result.risk_label]}`}>
+        <div className="panel-header-flat analysis-result-shell__header">
           {result.risk_label === "Low" && celebrateToken ? (
             <ReactionBurst key={`low-${celebrateToken}`} variant="low" />
           ) : null}
