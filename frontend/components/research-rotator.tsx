@@ -62,16 +62,31 @@ export default function ResearchRotator() {
               {slide.tag}
             </span>
           </div>
-          <div className="flex items-center gap-2">
-            <div className="flex gap-1.5">
-              {SLIDES.map((item, itemIndex) => (
-                <span
-                  key={item.title}
-                  className={`h-1.5 w-6 rounded-full ${itemIndex === index ? "bg-coral" : "bg-white/40"}`}
-                />
-              ))}
+          <div className="flex flex-col items-end gap-2">
+            <div className="flex items-center gap-2">
+              <div className="flex gap-1.5">
+                {SLIDES.map((item, itemIndex) => (
+                  <span
+                    key={item.title}
+                    className={`h-1.5 w-6 rounded-full ${itemIndex === index ? "bg-coral" : "bg-white/40"}`}
+                  />
+                ))}
+              </div>
+              <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Click</span>
             </div>
-            <span className="text-[10px] uppercase tracking-[0.18em] text-slate-500">Click</span>
+            <div className="group flex items-center gap-2">
+              <span className="max-w-0 overflow-hidden whitespace-nowrap text-[10px] uppercase tracking-[0.18em] text-slate-500 opacity-0 transition-all duration-200 group-hover:max-w-[120px] group-hover:opacity-100">
+                Go to daily feed
+              </span>
+              <Link
+                href="/research-signal"
+                aria-label="Open daily feed"
+                title="Open daily feed"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-emerald-200/70 bg-white/75 text-ink shadow-sm transition hover:bg-white hover:border-emerald-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400/70"
+              >
+                ↗
+              </Link>
+            </div>
           </div>
         </div>
       </button>
@@ -86,9 +101,6 @@ export default function ResearchRotator() {
       <div className="border-t border-white/50 bg-white/30 px-6 py-4 text-[11px] uppercase tracking-[0.18em] text-slate-600">
         <div className="flex items-center justify-between gap-2">
           <span>Source: {slide.source}</span>
-          <Link href="/research-signal" className="text-ink underline decoration-emerald-300/80 underline-offset-2">
-            Daily feed
-          </Link>
         </div>
       </div>
     </div>

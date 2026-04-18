@@ -596,6 +596,13 @@ export function PlannerForm() {
         ? "Watch recovery time and protect sleep."
         : "This load looks manageable with current recovery.";
 
+  const liveTotalTone =
+    totalLoadStatus === "risk"
+      ? "border-rose-200/70 bg-[linear-gradient(135deg,_rgba(255,245,245,0.82)_0%,_rgba(255,237,237,0.45)_100%)]"
+      : totalLoadStatus === "watch"
+        ? "border-amber-200/70 bg-[linear-gradient(135deg,_rgba(255,249,240,0.82)_0%,_rgba(255,240,214,0.45)_100%)]"
+        : "border-emerald-200/70 bg-[linear-gradient(135deg,_rgba(242,255,250,0.82)_0%,_rgba(228,250,241,0.45)_100%)]";
+
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:items-start 2xl:grid-cols-[minmax(0,0.76fr)_minmax(0,1.24fr)]">
       <div className="min-w-0">
@@ -605,30 +612,30 @@ export function PlannerForm() {
             <div className="relative flex items-start justify-between gap-4">
               <div>
                 <p className="eyebrow">Planner Input</p>
-                <h2 className="mt-2 text-xl font-semibold">Shape one week</h2>
+                <h2 className="mt-2 text-xl font-semibold">Plan your week</h2>
                 <p className="mt-1 max-w-md text-sm leading-6 text-slate-700">
-                  Adjust the schedule like a control panel, then see how the week changes.
+                  Tune your schedule inputs and instantly see how your week shifts.
                 </p>
               </div>
-              <div className="glass-stat w-full sm:w-auto sm:min-w-[196px]">
+              <div className={`w-full rounded-[20px] border px-4 py-3 shadow-sm backdrop-blur-xl sm:w-auto sm:min-w-[206px] ${liveTotalTone}`}>
                 <div className="flex items-center justify-between gap-2">
-                  <p className="text-[11px] uppercase tracking-[0.2em] text-stone-600">Live Total</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-stone-600">Live Total</p>
                   <span className={`h-2 w-2 rounded-full ${statStyleByStatus[totalLoadStatus].dot}`} />
                 </div>
-                <p className="mt-1 text-3xl font-semibold tabular-nums tracking-tight text-ink">
+                <p className="mt-1 text-[2rem] font-semibold tabular-nums tracking-tight text-ink">
                   {totalLoad}
                   <span className="ml-1 text-sm font-semibold text-stone-600">h</span>
                 </p>
-                <p className={`mt-1 text-xs font-semibold uppercase tracking-[0.14em] ${statStyleByStatus[totalLoadStatus].label}`}>
+                <p className={`mt-1 text-[11px] font-semibold uppercase tracking-[0.18em] ${statStyleByStatus[totalLoadStatus].label}`}>
                   {liveTotalTitle}
                 </p>
-                <div className="mt-2 h-1.5 rounded-full bg-white/35">
+                <div className="mt-2 h-2 rounded-full bg-white/45 shadow-inner">
                   <div
-                    className={`h-1.5 rounded-full bg-gradient-to-r ${statStyleByStatus[totalLoadStatus].bar}`}
+                    className={`h-2 rounded-full bg-gradient-to-r ${statStyleByStatus[totalLoadStatus].bar}`}
                     style={{ width: `${clampPercent(totalLoad, 60)}%` }}
                   />
                 </div>
-                <p className="mt-2 text-xs leading-6 text-slate-600">{liveTotalHint}</p>
+                <p className="mt-2 text-[11px] leading-5 text-slate-600">{liveTotalHint}</p>
               </div>
             </div>
           </div>
@@ -703,7 +710,7 @@ export function PlannerForm() {
                   <p className="mt-1 text-sm text-stone-600">Sleep, stress, and the amount of room left to breathe.</p>
                 </div>
                 <div className="glass-pill glass-pill-mint">
-                  {values.free_hours}h buffer
+                  {values.free_hours} buffer
                 </div>
               </div>
 
@@ -716,21 +723,16 @@ export function PlannerForm() {
               </div>
             </div>
 
-            <div className="surface-shell p-4">
-              <div className="grid gap-4 sm:grid-cols-3">
-                <div className="glass-stat">
+            <div className="surface-shell rounded-[28px] border border-white/65 bg-[linear-gradient(135deg,_rgba(255,255,255,0.72)_0%,_rgba(249,247,242,0.38)_56%,_rgba(242,249,246,0.24)_100%)] p-5 shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-6">
+              <div className="grid items-stretch gap-4 sm:grid-cols-3">
+                <div className="glass-stat h-full">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${statStyleByStatus[totalLoadStatus].dot}`} />
-                      <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[totalLoadStatus].label}`}>
-                        Total Load
-                      </p>
-                    </div>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-stone-600">hrs</span>
+                    <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[totalLoadStatus].label}`}>
+                      Total Load
+                    </p>
                   </div>
                   <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
                     {totalLoad}
-                    <span className="ml-1 text-base font-semibold text-stone-600">h</span>
                   </p>
                   <div className="mt-3 h-2 rounded-full bg-white/30">
                     <div
@@ -740,14 +742,11 @@ export function PlannerForm() {
                   </div>
                 </div>
 
-                <div className="glass-stat">
+                <div className="glass-stat h-full">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${statStyleByStatus[pressureStatus].dot}`} />
-                      <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[pressureStatus].label}`}>
-                        Priority Pressure
-                      </p>
-                    </div>
+                    <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[pressureStatus].label}`}>
+                      Priority Pressure
+                    </p>
                     <span className="text-[10px] uppercase tracking-[0.18em] text-stone-600">tasks</span>
                   </div>
                   <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
@@ -761,19 +760,14 @@ export function PlannerForm() {
                   </div>
                 </div>
 
-                <div className="glass-stat">
+                <div className="glass-stat h-full">
                   <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${statStyleByStatus[bufferStatus].dot}`} />
-                      <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[bufferStatus].label}`}>
-                        Recovery Buffer
-                      </p>
-                    </div>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-stone-600">hrs</span>
+                    <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[bufferStatus].label}`}>
+                      Recovery Buffer
+                    </p>
                   </div>
                   <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
                     {values.free_hours}
-                    <span className="ml-1 text-base font-semibold text-stone-600">h</span>
                   </p>
                   <div className="mt-3 h-2 rounded-full bg-white/30">
                     <div
