@@ -10,7 +10,7 @@ The idea is to build a smart planner that does more than track assignments. It e
 
 - Project title: `Burnout Sentinel`
 - Research subtitle: `An Early Warning System for Student Burnout Using Workload and Recovery Indicators`
-- Version: `0.3.0`
+- Version: `0.4.0`
 - Last updated: `April 18, 2026`
 - Scope: `MVP prototype`
 - Current focus: `Frontend experience, research feed, and explainable burnout analysis`
@@ -34,11 +34,14 @@ Nursing students often juggle classes, labs, clinical shifts, exams, assignments
 
 - lets students enter weekly workload and recovery inputs
 - shows a live burnout risk summary while planning
-- provides drag-and-drop dashboard panels with minimize/expand controls
+- provides drag-and-drop dashboard panels with collapse/expand controls
+- includes collapsible Workload and Recovery input sections (collapsed by default)
+- adds a `?` instruction popup with usage steps and scoring-formula explanation
 - displays a workload snapshot, what-if simulator, and trend chart
 - plays visual and audio feedback for presets and risk states
 - includes a daily Research Signal page with valid external links and infinite scrolling
-- offers footer links for reading research, sending feedback, and donating
+- includes lightweight cookie-session auth with Login and Signup pages
+- offers footer actions for login, reading research, sending feedback, donating, and GitHub project access
 
 ## Core Idea
 
@@ -110,20 +113,24 @@ The current codebase includes:
 
 - a landing page with a research rotator and footer action links
 - a planner form for a student schedule
+- collapsible input groups for Workload and Recovery
+- a planner help popup (`?`) with usage instructions and burnout-formula explanation
 - a FastAPI endpoint at `/api/v1/analyze`
 - an explainable risk-scoring engine
 - recommendation generation based on workload, sleep, exams, and stress
 - a frontend dashboard with a risk panel, metric snapshot, what-if simulator, and trend chart
 - drag-and-drop panel reordering with drop-zone hints
-- collapsible dashboard cards for the risk details, what-if simulator, workload snapshot, and trend chart
+- collapsible dashboard cards for risk details, what-if simulator, workload snapshot, and trend chart
 - state-specific audio and visual feedback for risk outcomes and preset actions
 - a daily Research Signal feed page with valid source links
 - infinite scroll loading for Research Signal content
+- cookie-session login/logout flow with dedicated `/login` and `/signup` pages
 
 ## Notes For Contributors
 
 - The frontend is the main active area for UI and interaction changes right now.
 - The Research Signal feed uses paged API loading and link fallbacks so external sources stay usable.
+- Auth is currently lightweight and session-cookie based (not OAuth or password auth yet).
 - Footer feedback currently opens an email draft to `dominhduy09@gmail.com`.
 
 ## Recommended Build Order From Here
