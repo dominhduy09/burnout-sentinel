@@ -1,11 +1,13 @@
 import { PlannerForm } from "@/components/planner-form";
 import { AmbientBackground } from "@/components/ambient-background";
 import ResearchRotator from "@/components/research-rotator";
+import WelcomeOverlay from "@/components/welcome-overlay";
 import Link from "next/link";
 
 export default function HomePage() {
   return (
     <main className="relative min-h-screen overflow-x-hidden text-slate-900 transition-colors">
+      <WelcomeOverlay />
       <AmbientBackground />
 
       <section className="relative border-b border-white/50 backdrop-blur-xl">
