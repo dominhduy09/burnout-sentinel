@@ -274,6 +274,7 @@ export function PlannerForm() {
   const [panelOrder, setPanelOrder] = useState<PanelKey[]>(defaultPanelOrder);
   const [draggedPanel, setDraggedPanel] = useState<PanelKey | null>(null);
   const [dragOverPanel, setDragOverPanel] = useState<PanelKey | null>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [inputSections, setInputSections] = useState({
     workload: false,
     recovery: false
@@ -660,6 +661,21 @@ export function PlannerForm() {
     playOverloadedSound();
   }, [analysisToken]);
 
+  useEffect(() => {
+    if (!helpOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setHelpOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [helpOpen]);
+
   const totalLoad = Number(values.estimated_task_hours) + Number(values.clinical_hours);
   const totalLoadStatus = totalLoad > 40 ? "risk" : totalLoad > 28 ? "watch" : "healthy";
   const pressureStatus =
@@ -710,7 +726,17 @@ export function PlannerForm() {
             <div className="absolute inset-0 glass-grain" />
             <div className="relative flex items-start justify-between gap-4">
               <div>
-                <p className="eyebrow">Planner Input</p>
+                <div className="flex items-center gap-2">
+                  <p className="eyebrow">Planner Input</p>
+                  <button
+                    type="button"
+                    onClick={() => setHelpOpen(true)}
+                    aria-label="Open planner instructions and formula details"
+                    className="glass-button inline-flex h-7 w-7 items-center justify-center rounded-full border border-emerald-200/70 text-xs font-semibold text-emerald-900 hover:border-emerald-300/80"
+                  >
+                    ?
+                  </button>
+                </div>
                 <h2 className="mt-2 text-xl font-semibold">Plan your week</h2>
                 <p className="mt-1 max-w-md text-sm leading-6 text-slate-700">
                   Tune your schedule inputs and instantly see how your week shifts.
@@ -1114,6 +1140,74 @@ export function PlannerForm() {
           );
         })}
       </div>
+
+      {helpOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/35 p-4 backdrop-blur-sm"
+          onClick={() => setHelpOpen(false)}
+          role="presentation"
+        >
+          <div
+            className="relative w-full max-w-4xl rounded-[30px] border border-white/65 bg-[linear-gradient(135deg,_rgba(255,255,255,0.9)_0%,_rgba(236,253,245,0.68)_52%,_rgba(239,246,255,0.6)_100%)] p-5 shadow-[0_32px_80px_rgba(15,23,42,0.32)] backdrop-blur-2xl sm:p-6"
+            onClick={(event) => event.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Burnout Sentinel instructions and formula"
+          >
+            <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h3 className="text-base font-semibold text-ink">How to use Burnout Sentinel</h3>
+                <p className="mt-1 text-sm text-slate-700">
+                  Quick guide plus the scoring formula used to estimate stress and burnout risk.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHelpOpen(false)}
+                className="glass-button rounded-full px-3 py-1.5 text-xs font-semibold text-ink hover:border-rose-200/70"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-2">
+              <div className="rounded-2xl border border-white/60 bg-white/35 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Instructions</p>
+                <ol className="mt-2 space-y-1.5 text-sm leading-6 text-slate-700">
+                  <li>1. Pick a preset or fill in your week inputs.</li>
+                  <li>2. Add workload details: tasks, exams, study hours, and clinical hours.</li>
+                  <li>3. Add recovery details: sleep, stress level, and free hours.</li>
+                  <li>4. Click Analyze Burnout Risk to compute risk score and recommendations.</li>
+                  <li>5. Save week snapshot to track your trend over time.</li>
+                </ol>
+              </div>
+
+              <div className="rounded-2xl border border-white/60 bg-white/35 p-4">
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-500">Formula</p>
+                <div className="mt-2 space-y-2 text-sm leading-6 text-slate-700">
+                  <p>
+                    Demand score = 0.20 x taskPressure + 0.20 x criticalPressure + 0.30 x loadPressure + 0.15 x
+                    examPressure + 0.15 x clinicalPressure
+                  </p>
+                  <p>Recovery deficit = 0.65 x sleepDeficit + 0.35 x bufferDeficit</p>
+                  <p>Stress signal = normalized(stressLevel from 1-10) x 100</p>
+                  <p>Base risk = clamp(0.55 x demandScore + 0.30 x recoveryDeficit + 0.15 x stressSignal, 0, 100)</p>
+                  <p>
+                    Final burnout risk = clamp(baseRisk x mSleep x mBuffer x mCompression x mDeadlines x mClinical, 0,
+                    100)
+                  </p>
+                  <p className="text-xs text-slate-600">
+                    Where mSleep = 1 + 0.22 x sleepDeficitRatio, mBuffer = 1 + 0.15 x bufferDeficitRatio,
+                    mCompression = 1 + 0.10 x compressionRatio, mDeadlines adds 0.08 (+0.06 with high critical tasks),
+                    and mClinical = 1 + 0.08 x clinicalIntensityRatio.
+                  </p>
+                  <p className="text-xs text-slate-600">Risk label thresholds: Low &lt; 40, Moderate 40-69, High &gt;= 70.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
