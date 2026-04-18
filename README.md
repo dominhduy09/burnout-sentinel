@@ -10,8 +10,8 @@ The idea is to build a smart planner that does more than track assignments. It e
 
 - Project title: `Burnout Sentinel`
 - Research subtitle: `An Early Warning System for Student Burnout Using Workload and Recovery Indicators`
-- Version: `0.2.1`
-- Last updated: `April 3, 2026 01:02 AM CDT`
+- Version: `0.3.0`
+- Last updated: `April 18, 2026`
 - Scope: `MVP prototype`
 
 ## Project Goal
@@ -99,7 +99,11 @@ The current codebase includes:
 - a FastAPI endpoint at `/api/v1/analyze`
 - an explainable risk-scoring engine
 - recommendation generation based on workload, sleep, exams, and stress
-- a frontend dashboard with a risk panel and chart
+- a frontend dashboard with a risk panel, metric snapshot, what-if simulator, and trend chart
+- drag-and-drop panel reordering with drop-zone hints
+- state-specific audio and visual feedback for risk outcomes and preset actions
+- a daily Research Signal feed page with valid source links
+- infinite scroll loading for Research Signal content
 
 ## Recommended Build Order From Here
 
