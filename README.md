@@ -26,7 +26,8 @@ Nursing students often juggle classes, labs, clinical shifts, exams, assignments
 - `docs/build-plan.md`: practical implementation roadmap
 - `docs/tech-stack.md`: recommended scalable tech stack
 - `frontend/`: Next.js app for the student planner UI
-- `backend/`: FastAPI app for burnout analysis and recommendations
+- `backend/`: FastAPI burnout scoring API and recommendations service
+- `backend/README.md`: backend run, test, and troubleshooting guide
 - `ml/`: future home for training scripts and saved models
 - `shared/`: future home for shared schemas and constants
 
@@ -86,12 +87,14 @@ Can a machine learning-supported planning tool help students identify overload a
 
 ### Backend
 
+See the full guide in [backend/README.md](backend/README.md) for setup, run, test, and troubleshooting steps.
+
+Quick start:
+
 ```bash
 cd /Users/dominhduy/Documents/Playground/burnout-sentinel/backend
-python3 -m venv .venv
 source .venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --reload
+python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 The API will run at `http://localhost:8000`.
@@ -125,6 +128,7 @@ The current codebase includes:
 - a daily Research Signal feed page with valid source links
 - infinite scroll loading for Research Signal content
 - cookie-session login/logout flow with dedicated `/login` and `/signup` pages
+- a backend guide for setup, running, tests, and common fixes
 
 ## Notes For Contributors
 
@@ -132,6 +136,7 @@ The current codebase includes:
 - The Research Signal feed uses paged API loading and link fallbacks so external sources stay usable.
 - Auth is currently lightweight and session-cookie based (not OAuth or password auth yet).
 - Footer feedback currently opens an email draft to `dominhduy09@gmail.com`.
+- The backend currently serves an explainable rules-based scoring API; future ML work can keep the same contract.
 
 ## Recommended Build Order From Here
 
