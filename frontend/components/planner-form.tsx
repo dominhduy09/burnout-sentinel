@@ -670,6 +670,27 @@ export function PlannerForm() {
         ? "border-amber-200/70 bg-[linear-gradient(135deg,_rgba(255,249,240,0.82)_0%,_rgba(255,240,214,0.45)_100%)]"
         : "border-emerald-200/70 bg-[linear-gradient(135deg,_rgba(242,255,250,0.82)_0%,_rgba(228,250,241,0.45)_100%)]";
 
+  const totalLoadTone =
+    totalLoadStatus === "risk"
+      ? "border-rose-200/70 bg-[linear-gradient(135deg,_rgba(255,245,245,0.78)_0%,_rgba(255,237,237,0.4)_100%)]"
+      : totalLoadStatus === "watch"
+        ? "border-amber-200/70 bg-[linear-gradient(135deg,_rgba(255,249,240,0.78)_0%,_rgba(255,240,214,0.4)_100%)]"
+        : "border-emerald-200/70 bg-[linear-gradient(135deg,_rgba(242,255,250,0.78)_0%,_rgba(228,250,241,0.4)_100%)]";
+
+  const pressureTone =
+    pressureStatus === "risk"
+      ? "border-rose-200/70 bg-[linear-gradient(135deg,_rgba(255,245,245,0.78)_0%,_rgba(255,237,237,0.4)_100%)]"
+      : pressureStatus === "watch"
+        ? "border-amber-200/70 bg-[linear-gradient(135deg,_rgba(255,249,240,0.78)_0%,_rgba(255,240,214,0.4)_100%)]"
+        : "border-emerald-200/70 bg-[linear-gradient(135deg,_rgba(242,255,250,0.78)_0%,_rgba(228,250,241,0.4)_100%)]";
+
+  const bufferTone =
+    bufferStatus === "risk"
+      ? "border-rose-200/70 bg-[linear-gradient(135deg,_rgba(255,245,245,0.78)_0%,_rgba(255,237,237,0.4)_100%)]"
+      : bufferStatus === "watch"
+        ? "border-amber-200/70 bg-[linear-gradient(135deg,_rgba(255,249,240,0.78)_0%,_rgba(255,240,214,0.4)_100%)]"
+        : "border-emerald-200/70 bg-[linear-gradient(135deg,_rgba(242,255,250,0.78)_0%,_rgba(228,250,241,0.4)_100%)]";
+
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,0.8fr)_minmax(0,1.2fr)] xl:items-start 2xl:grid-cols-[minmax(0,0.76fr)_minmax(0,1.24fr)]">
       <div className="min-w-0">
@@ -797,14 +818,16 @@ export function PlannerForm() {
 
             <div className="surface-shell rounded-[28px] border border-white/65 bg-[linear-gradient(135deg,_rgba(255,255,255,0.72)_0%,_rgba(249,247,242,0.38)_56%,_rgba(242,249,246,0.24)_100%)] p-5 shadow-[0_16px_38px_rgba(15,23,42,0.08)] backdrop-blur-xl sm:p-6">
               <div className="grid items-stretch gap-4 sm:grid-cols-3">
-                <div className="glass-stat h-full">
+                <div className={`h-full rounded-[20px] border px-4 py-3 shadow-sm backdrop-blur-xl ${totalLoadTone}`}>
                   <div className="flex items-center justify-between gap-3">
                     <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[totalLoadStatus].label}`}>
                       Total Load
                     </p>
+                    <span className={`h-2 w-2 rounded-full ${statStyleByStatus[totalLoadStatus].dot}`} />
                   </div>
                   <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
                     {totalLoad}
+                    <span className="ml-1 text-sm font-semibold text-stone-600">hrs</span>
                   </p>
                   <div className="mt-3 h-2 rounded-full bg-white/30">
                     <div
@@ -814,15 +837,16 @@ export function PlannerForm() {
                   </div>
                 </div>
 
-                <div className="glass-stat h-full">
+                <div className={`h-full rounded-[20px] border px-4 py-3 shadow-sm backdrop-blur-xl ${pressureTone}`}>
                   <div className="flex items-center justify-between gap-3">
                     <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[pressureStatus].label}`}>
                       Priority Pressure
                     </p>
-                    <span className="text-[10px] uppercase tracking-[0.18em] text-stone-600">tasks</span>
+                    <span className={`h-2 w-2 rounded-full ${statStyleByStatus[pressureStatus].dot}`} />
                   </div>
                   <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
                     {values.high_priority_task_count}
+                    <span className="ml-1 text-sm font-semibold text-stone-600">tasks</span>
                   </p>
                   <div className="mt-3 h-2 rounded-full bg-white/30">
                     <div
@@ -832,14 +856,16 @@ export function PlannerForm() {
                   </div>
                 </div>
 
-                <div className="glass-stat h-full">
+                <div className={`h-full rounded-[20px] border px-4 py-3 shadow-sm backdrop-blur-xl ${bufferTone}`}>
                   <div className="flex items-center justify-between gap-3">
                     <p className={`text-xs uppercase tracking-[0.18em] ${statStyleByStatus[bufferStatus].label}`}>
                       Recovery Buffer
                     </p>
+                    <span className={`h-2 w-2 rounded-full ${statStyleByStatus[bufferStatus].dot}`} />
                   </div>
                   <p className="mt-2 text-3xl font-semibold tabular-nums tracking-tight text-ink">
                     {values.free_hours}
+                    <span className="ml-1 text-sm font-semibold text-stone-600">hrs</span>
                   </p>
                   <div className="mt-3 h-2 rounded-full bg-white/30">
                     <div
