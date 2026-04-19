@@ -1,0 +1,80 @@
+Burnout Sentinel - Expo Competition Abstract and Presentation
+
+Project Title:
+Burnout Sentinel
+
+Research Subtitle:
+An Early Warning System for Student Burnout Using Workload and Recovery Indicators
+
+==================================================
+ABSTRACT
+==================================================
+
+Burnout Sentinel is an early warning planning system designed to help students identify overload risk before stress develops into burnout. Students in demanding programs often manage classes, exams, labs, clinical shifts, assignments, work, and personal responsibilities at the same time. Traditional planners can track tasks, but they do not explain when a schedule becomes unhealthy.
+
+This project introduces a smart planner that combines weekly scheduling inputs with an explainable burnout-risk scoring engine. Users enter workload and recovery indicators, including task count, high-priority tasks, study hours, exam load, clinical hours, sleep, stress level, and free time. The system produces a risk score, risk label, contributing factors, and actionable recommendations for improving balance.
+
+The current prototype includes an interactive web dashboard with live risk feedback, what-if simulation, trend tracking, and research signal context. Its backend API is built with FastAPI, and the frontend is implemented in Next.js with TypeScript. The scoring approach is intentionally explainable so users can understand why risk changes and what to adjust first.
+
+Burnout Sentinel contributes a practical prevention-first workflow: detect overload early, guide weekly plan changes, and support healthier academic decision-making. The long-term direction is to validate and enhance the model with real-world data while preserving transparent outputs for students and educators.
+
+==================================================
+PRESENTATION SCRIPT (ABOUT 3-5 MINUTES)
+==================================================
+
+Slide 1 - Opening
+Hello everyone. Our project is Burnout Sentinel, an early warning system for student burnout.
+The core idea is simple: what if a planner could tell you not only what you have to do, but also whether your week is becoming unhealthy?
+
+Slide 2 - Problem
+Students in rigorous programs often carry overloaded weeks with overlapping deadlines, exams, clinicals, and personal obligations.
+Most planning tools are task trackers. They show volume, but they do not estimate burnout risk.
+By the time students feel the impact, sleep, performance, and well-being are already affected.
+
+Slide 3 - Solution
+Burnout Sentinel combines planning with explainable risk analysis.
+A student enters weekly inputs:
+- workload: tasks, study hours, exams, clinical hours
+- recovery: sleep, stress level, and free buffer time
+The system then returns:
+- a burnout risk score from 0 to 100
+- a risk level: Low, Moderate, or High
+- contributing factors
+- practical recommendations
+
+Slide 4 - How It Works
+Our current implementation uses an explainable scoring engine.
+We first calculate workload demand and recovery deficit signals, then apply controlled amplifiers for factors like compressed task load and deadline clustering.
+This gives users transparency: they can see exactly why the score is high and what change would reduce risk.
+
+Slide 5 - Product Demo Flow
+In the demo, we show:
+1) Entering a heavy week profile
+2) The dashboard flagging increased risk
+3) What-if simulation to test alternatives
+4) Updated recommendations for a healthier schedule
+5) Trend tracking over saved snapshots
+
+Slide 6 - Technical Stack
+Frontend: Next.js + TypeScript
+Backend: FastAPI
+Visualization: interactive cards and trend charts
+API: /api/v1/analyze endpoint for risk scoring and recommendations
+The architecture is designed so we can later swap in a trained ML model without changing the frontend experience.
+
+Slide 7 - Impact
+This project shifts burnout support from reactive to preventive.
+Instead of waiting for burnout symptoms, students get early indicators and realistic weekly adjustments.
+Our goal is to improve academic sustainability, decision quality, and student well-being.
+
+Slide 8 - Future Work
+Next, we plan to:
+- collect and validate with pilot user data
+- improve personalization by student context
+- evaluate outcome metrics across multiple weeks
+- integrate optional campus support pathways when risk remains high
+
+Slide 9 - Closing
+Burnout Sentinel is a practical step toward healthier student planning.
+It turns weekly schedules into actionable risk insight, so students can rebalance before overload becomes burnout.
+Thank you.
