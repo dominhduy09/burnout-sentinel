@@ -1,95 +1,90 @@
+<div align="center">
+
 # Burnout Sentinel
 
-## An Early Warning System for Student Burnout Using Workload and Recovery Indicators
+**An Early Warning System for Student Burnout Using Workload and Recovery Indicators**
 
-Burnout Sentinel is a student wellness project focused on helping students manage heavy weekly workloads before stress becomes burnout.
+[![Version](https://img.shields.io/badge/version-0.4.0-blue.svg)](README.md)
+[![Frontend](https://img.shields.io/badge/frontend-Next.js%2014-black.svg)](frontend/package.json)
+[![Backend](https://img.shields.io/badge/backend-FastAPI-009688.svg)](backend/app/main.py)
+[![Status](https://img.shields.io/badge/status-MVP-green.svg)](README.md)
 
-The idea is to build a smart planner that does more than track assignments. It estimates overload risk, highlights unhealthy weeks, and suggests better planning choices using explainable scoring, research signals, and optional AI-assisted guidance later.
+[Overview](#overview) - [Features](#features) - [Quick Start](#quick-start) - [Project Structure](#project-structure) - [Roadmap](#roadmap)
+
+</div>
+
+---
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Project Status](#project-status)
+- [Features](#features)
+- [How It Works](#how-it-works)
+- [Quick Start](#quick-start)
+- [Project Structure](#project-structure)
+- [Tech Stack](#tech-stack)
+- [Research Question](#research-question)
+- [Roadmap](#roadmap)
+- [Contributing Notes](#contributing-notes)
+
+---
+
+## Overview
+
+Burnout Sentinel is a student wellness project focused on helping students detect overload early and rebalance their week before stress becomes burnout.
+
+Instead of acting like a basic to-do list, the app combines planning inputs with explainable risk scoring, personalized recommendations, and trend tracking.
+
+The current implementation is an MVP prototype with a polished UI, backend analysis API, and competition-ready demo flow.
 
 ## Project Status
 
-- Project title: `Burnout Sentinel`
-- Research subtitle: `An Early Warning System for Student Burnout Using Workload and Recovery Indicators`
-- Version: `0.4.0`
-- Last updated: `April 18, 2026`
-- Scope: `MVP prototype`
-- Current focus: `Frontend experience, research feed, and explainable burnout analysis`
+- Project title: Burnout Sentinel
+- Research subtitle: An Early Warning System for Student Burnout Using Workload and Recovery Indicators
+- Version: 0.4.0
+- Last updated: April 19, 2026
+- Scope: MVP prototype
+- Current focus: frontend experience, research feed, and explainable burnout analysis
 
-## Project Goal
+## Features
 
-Nursing students often juggle classes, labs, clinical shifts, exams, assignments, and personal responsibilities. This project explores whether a planning tool can help students identify overload early and make healthier weekly decisions.
+### Core Planner
+- Weekly workload and recovery input form
+- Preset weeks (Balanced, Heavy, Overloaded)
+- Live workload summary while editing
+- Collapse/expand controls for planner sections and analysis panels
 
-## What Is In This Folder
+### Analysis and Guidance
+- Burnout risk score (0-100) with Low/Moderate/High labels
+- Explainable score breakdown and contributing factors
+- What-if simulation for schedule adjustments
+- Personalized recommendation generation
 
-- `docs/project-proposal.md`: full research and project proposal
-- `docs/expo-pitch.md`: short summary and talking points for Expo
-- `docs/build-plan.md`: practical implementation roadmap
-- `docs/tech-stack.md`: recommended scalable tech stack
-- `frontend/`: Next.js app for the student planner UI
-- `backend/`: FastAPI burnout scoring API and recommendations service
-- `backend/README.md`: backend run, test, and troubleshooting guide
-- `ml/`: future home for training scripts and saved models
-- `shared/`: future home for shared schemas and constants
+### Visualization and Interaction
+- Workload snapshot metrics
+- Risk trend chart with saved snapshots
+- Drag-and-drop panel reordering
+- State-aware UI feedback for preset and risk interactions
 
-## What The App Does Now
+### Research and Product Experience
+- Research Signal page with external links and infinite scrolling
+- Help popup for formula and usage instructions
+- Lightweight cookie-session login/signup flow
 
-- lets students enter weekly workload and recovery inputs
-- shows a live burnout risk summary while planning
-- provides drag-and-drop dashboard panels with collapse/expand controls
-- includes collapsible Workload and Recovery input sections (collapsed by default)
-- adds a `?` instruction popup with usage steps and scoring-formula explanation
-- displays a workload snapshot, what-if simulator, and trend chart
-- plays visual and audio feedback for presets and risk states
-- includes a daily Research Signal page with valid external links and infinite scrolling
-- includes lightweight cookie-session auth with Login and Signup pages
-- offers footer actions for login, reading research, sending feedback, donating, and GitHub project access
+## How It Works
 
-## Core Idea
+1. Student enters weekly workload and recovery indicators.
+2. Frontend validates payload and posts to `POST /api/v1/analyze`.
+3. Backend computes explainable risk and recommendations.
+4. Frontend renders risk summary, breakdown, what-if panel, and trend insights.
+5. If backend is unavailable, frontend can fall back to local analyzer logic.
 
-The planner will let students:
-
-- enter weekly tasks and time commitments
-- view a workload dashboard
-- receive a burnout risk score
-- get suggestions for balancing their schedule
-
-The current implementation also emphasizes a more readable, glass-style interface with compact action buttons and research-focused context.
-
-## Proposed Tech Direction
-
-The recommended stack is documented in `docs/tech-stack.md`.
-
-Short version:
-
-- Frontend: Next.js with TypeScript
-- Backend API: FastAPI with Python
-- Machine learning: scikit-learn
-- Database: PostgreSQL
-- ORM: Prisma
-- Auth: NextAuth.js or Clerk later if needed
-- Charts: Recharts
-- Styling: Tailwind CSS
-- Validation: Zod on the frontend and Pydantic on the backend
-- Deployment: Vercel for frontend and Render or Railway for backend
-
-## Research Question
-
-Can a machine learning-supported planning tool help students identify overload and reduce burnout risk by providing personalized weekly planning recommendations?
-
-## Next Steps
-
-1. Review the proposal and adjust wording to match your class or mentor expectations.
-2. Choose whether you want this to be a research prototype, a full app prototype, or both.
-3. Decide what data you want to use first: survey data, simulated data, or pilot user input.
-4. Start wireframing the planner interface.
-
-## Run The App
+## Quick Start
 
 ### Backend
 
-See the full guide in [backend/README.md](backend/README.md) for setup, run, test, and troubleshooting steps.
-
-Quick start:
+For full setup, tests, and troubleshooting, see [backend/README.md](backend/README.md).
 
 ```bash
 cd /Users/dominhduy/Documents/Playground/burnout-sentinel/backend
@@ -97,7 +92,9 @@ source .venv/bin/activate
 python3 -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-The API will run at `http://localhost:8000`.
+Backend endpoints:
+- Health: http://localhost:8000/health
+- Docs: http://localhost:8000/docs
 
 ### Frontend
 
@@ -108,39 +105,46 @@ npm install
 npm run dev
 ```
 
-The app will run at `http://localhost:3000`.
+Frontend app:
+- http://localhost:3000
 
-## MVP That Is Already Built
+### Vercel Deployment
 
-The current codebase includes:
+See [docs/vercel-deployment.md](docs/vercel-deployment.md) for monorepo/Vercel setup.
 
-- a landing page with a research rotator and footer action links
-- a planner form for a student schedule
-- collapsible input groups for Workload and Recovery
-- a planner help popup (`?`) with usage instructions and burnout-formula explanation
-- a FastAPI endpoint at `/api/v1/analyze`
-- an explainable risk-scoring engine
-- recommendation generation based on workload, sleep, exams, and stress
-- a frontend dashboard with a risk panel, metric snapshot, what-if simulator, and trend chart
-- drag-and-drop panel reordering with drop-zone hints
-- collapsible dashboard cards for risk details, what-if simulator, workload snapshot, and trend chart
-- state-specific audio and visual feedback for risk outcomes and preset actions
-- a daily Research Signal feed page with valid source links
-- infinite scroll loading for Research Signal content
-- cookie-session login/logout flow with dedicated `/login` and `/signup` pages
-- a backend guide for setup, running, tests, and common fixes
+## Project Structure
 
-## Notes For Contributors
+- [frontend/](frontend): Next.js application (UI, client logic, API route bridge)
+- [backend/](backend): FastAPI burnout scoring and recommendation API
+- [backend/README.md](backend/README.md): backend run/test/troubleshooting guide
+- [docs/](docs): proposal, pitch notes, build plan, deployment notes
+- [ml/](ml): future machine-learning workspace
+- [shared/](shared): future shared schemas/constants/prompts
 
-- The frontend is the main active area for UI and interaction changes right now.
-- The Research Signal feed uses paged API loading and link fallbacks so external sources stay usable.
-- Auth is currently lightweight and session-cookie based (not OAuth or password auth yet).
-- Footer feedback currently opens an email draft to `dominhduy09@gmail.com`.
-- The backend currently serves an explainable rules-based scoring API; future ML work can keep the same contract.
+## Tech Stack
 
-## Recommended Build Order From Here
+- Frontend: Next.js, React, TypeScript, Tailwind CSS
+- Forms/Validation: React Hook Form, Zod
+- Charts: Recharts
+- Backend: FastAPI, Pydantic
+- Modeling approach: explainable rules-based risk scoring (ML-ready architecture)
+- Deployment target: Vercel (frontend) + Render/Railway/Fly/Azure (backend)
 
-1. Run the current MVP locally.
-2. Replace the explainable scoring logic with a trained scikit-learn model if you collect data.
-3. Add schedule persistence with SQLite.
-4. Add user accounts and multi-week trend tracking.
+## Research Question
+
+Can a machine learning-supported planning tool help students identify overload and reduce burnout risk by providing personalized weekly planning recommendations?
+
+## Roadmap
+
+- Replace explainable rules with trained model once dataset is available
+- Add persistence for long-term schedule and trend history
+- Expand recommendation quality and personalization
+- Add optional account system for multi-device continuity
+
+## Contributing Notes
+
+- Frontend is the most active iteration area.
+- Backend currently prioritizes explainability and stability for demos.
+- Auth is session-cookie based (not OAuth/password auth).
+- Research feed uses paged loading with link fallbacks.
+- Feedback currently opens mail draft to `dominhduy09@gmail.com`.
