@@ -201,7 +201,7 @@ export default function ResearchSignalPage() {
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-600">Highlight quote</p>
                   <blockquote className="mt-2 rounded-2xl border border-white/60 bg-white/35 px-4 py-4 text-sm leading-7 text-slate-700">
-                    "{data.signals[0]?.title ?? "Reliable evidence helps you plan before overload builds up."}"
+                    &ldquo;{data.signals[0]?.title ?? "Reliable evidence helps you plan before overload builds up."}&rdquo;
                   </blockquote>
                 </div>
 

@@ -13,8 +13,7 @@ function buildInsight(
   label: string,
   value: number,
   healthyMax: number,
-  warningMax: number,
-  unit: string
+  warningMax: number
 ): Insight {
   let status: Insight["status"] = "healthy";
 
@@ -35,8 +34,7 @@ function buildInverseInsight(
   label: string,
   value: number,
   healthyMin: number,
-  warningMin: number,
-  unit: string
+  warningMin: number
 ): Insight {
   let status: Insight["status"] = "healthy";
 
@@ -246,11 +244,11 @@ export function analyzePlannerInput(payload: PlannerFormValues): AnalysisRespons
   }
 
   const insights: Insight[] = [
-    buildInsight("Task Load", payload.task_count, 16, 22, "tasks"),
-    buildInsight("Priority Tasks", payload.high_priority_task_count, 3, 5, "tasks"),
-    buildInsight("Work Hours", academicLoadHours, 28, 40, "hours"),
-    buildInverseInsight("Sleep", payload.average_sleep_hours, 7.5, 6.5, "hours/night"),
-    buildInverseInsight("Free Time", payload.free_hours, 16, 10, "hours/week")
+    buildInsight("Task Load", payload.task_count, 16, 22),
+    buildInsight("Priority Tasks", payload.high_priority_task_count, 3, 5),
+    buildInsight("Work Hours", academicLoadHours, 28, 40),
+    buildInverseInsight("Sleep", payload.average_sleep_hours, 7.5, 6.5),
+    buildInverseInsight("Free Time", payload.free_hours, 16, 10)
   ];
 
   const summary =
