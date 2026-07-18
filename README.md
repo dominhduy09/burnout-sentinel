@@ -1,3 +1,5 @@
+<img width="1710" height="1204" alt="Screenshot 2026-07-18 at 01 59 32" src="https://github.com/user-attachments/assets/708ede9c-5137-48e6-a88c-90f99fb43107" />
+
 <div align="center">
 
 # Burnout Sentinel
