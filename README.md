@@ -29,7 +29,8 @@
 - [Tech Stack](#tech-stack)
 - [Research Question](#research-question)
 - [Roadmap](#roadmap)
-- [Contributing Notes](#contributing-notes)
+- [Contributing](#contributing)
+- [License](#license)
 
 ---
 
@@ -153,10 +154,10 @@ Can a machine learning-supported planning tool help students identify overload a
 - Expand recommendation quality and personalization
 - Add optional account system for multi-device continuity
 
-## Contributing Notes
+## Contributing
 
-- Frontend is the most active iteration area.
-- Backend currently prioritizes explainability and stability for demos.
-- Auth is session-cookie based (not OAuth/password auth).
-- Research feed uses paged loading with link fallbacks.
-- Feedback currently opens mail draft to `dominhduy09@gmail.com`.
+Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) guide for details on how to set up the development environment, coding standards, and submit pull requests.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
