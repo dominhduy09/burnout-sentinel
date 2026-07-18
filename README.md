@@ -8,8 +8,10 @@
 [![Frontend](https://img.shields.io/badge/frontend-Next.js%2014-black.svg)](frontend/package.json)
 [![Backend](https://img.shields.io/badge/backend-FastAPI-009688.svg)](backend/app/main.py)
 [![Status](https://img.shields.io/badge/status-MVP-green.svg)](README.md)
+[![Deployment](https://img.shields.io/badge/deployment-live-success.svg)](https://burnout-sentinel-omega.vercel.app/)
+[![Video Demo](https://img.shields.io/badge/video-demo-red.svg?logo=youtube)](https://www.youtube.com/watch?v=gzJWwboo6fU)
 
-[Overview](#overview) - [Features](#features) - [Quick Start](#quick-start) - [Project Structure](#project-structure) - [Roadmap](#roadmap)
+[Overview](#overview) - [Live Demo & Presentation](#live-demo--presentation) - [Features](#features) - [Quick Start](#quick-start) - [Project Structure](#project-structure) - [Roadmap](#roadmap)
 
 </div>
 
@@ -18,6 +20,7 @@
 ## Table of Contents
 
 - [Overview](#overview)
+- [Live Demo & Presentation](#live-demo--presentation)
 - [Project Status](#project-status)
 - [Features](#features)
 - [How It Works](#how-it-works)
@@ -27,6 +30,15 @@
 - [Research Question](#research-question)
 - [Roadmap](#roadmap)
 - [Contributing Notes](#contributing-notes)
+
+---
+
+## Live Demo & Presentation
+
+- 🚀 **Live Web Application:** [https://burnout-sentinel-omega.vercel.app/](https://burnout-sentinel-omega.vercel.app/)
+- 🎥 **Video Demo & Presentation:** [YouTube Link](https://www.youtube.com/watch?v=gzJWwboo6fU)
+- ⚙️ **API Documentation (Swagger UI):** [https://burnout-sentinel-omega.vercel.app/docs](https://burnout-sentinel-omega.vercel.app/docs)
+- 🩺 **API Health Check:** [https://burnout-sentinel-omega.vercel.app/health](https://burnout-sentinel-omega.vercel.app/health)
 
 ---
 
