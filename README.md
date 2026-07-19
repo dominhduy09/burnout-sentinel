@@ -33,6 +33,7 @@
 - [Roadmap](#roadmap)
 - [Contributing](#contributing)
 - [License](#license)
+- [Privacy Policy](#privacy-policy)
 
 ---
 
@@ -163,3 +164,7 @@ Contributions are welcome! Please read our [CONTRIBUTING.md](CONTRIBUTING.md) gu
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Privacy Policy
+
+We respect your data privacy. Please read our [Privacy.md](Privacy.md) file to understand how we process planner inputs and cookies.
